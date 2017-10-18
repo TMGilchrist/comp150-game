@@ -29,10 +29,13 @@ class ObjectClass:
     def render(self):
         """Renders the object sprite at its given position (overloadable function)"""
         if self.sprite is not None:
-            screen.blit(self.sprite, (self.x, self.y))
+            screen.blit(self.sprite,
+                        (self.x * TILE_WIDTH, self.y * TILE_HEIGHT))
+
 
 class CharacterClass(ObjectClass):
     etc = 0  # Todo
+
 
 class PlayerClass(CharacterClass):
     def __init__(self, x, y):
@@ -43,10 +46,20 @@ class PlayerClass(CharacterClass):
         # Scale character so we can see his beauty
         self.sprite = pygame.transform.scale(
                         self.sprite,
-                        (self.sprite.get_width() * 4, self.sprite.get_height() * 4))
+                        (self.sprite.get_width() * 4,
+                         self.sprite.get_height() * 4))
 
     def update(self):
         # Character movement in response to input will go here :)
+        key_pressed = pygame.key.get_pressed()
+        if key_pressed[pygame.K_w]:
+            self.y -= 1 * delta_time
+        if key_pressed[pygame.K_s]:
+            self.y += 1 * delta_time
+        if key_pressed[pygame.K_d]:
+            self.x += 1 * delta_time
+        if key_pressed[pygame.K_a]:
+            self.x -= 1 * delta_time
 
 
 # Constants
@@ -83,6 +96,8 @@ while running:
                 (event.type == pygame.KEYDOWN and
                  event.key == pygame.K_ESCAPE):
             running = False
+
+    player.update()
 
     # Perform rendering (todo: move into separate Render class)
     player.render()
