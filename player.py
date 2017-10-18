@@ -1,11 +1,17 @@
 # Standard imports
 import time
+import math
 
 # Third party imports
 import pygame
 
 # Local imports (todo: remove these comments when we're all comfortable with
 #                this ordering)
+
+
+def distance((x1, y1), (x2, y2)):
+    """Returns the distance between two points, in tile units"""
+    return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
 
 class ObjectClass:
@@ -38,6 +44,12 @@ class CharacterClass(ObjectClass):
 
 
 class PlayerClass(CharacterClass):
+    max_speed = 6.0  # The maximum running speed, in tiles/sec
+    acceleration = 10.0  # Rate of acceleration while running, in tiles/sec/sec
+    friction = 30.0  # Rate of slowdown when releasing movement keys
+    x_velocity = 0.0  # Rate of movement per axis in tiles/sec
+    y_velocity = 0.0
+
     def __init__(self, x, y):
         """Init: Loads default player sprite and scales it up"""
         # Load character image
@@ -50,16 +62,57 @@ class PlayerClass(CharacterClass):
                          self.sprite.get_height() * 4))
 
     def update(self):
-        # Character movement in response to input will go here :)
+        global delta_time
+        # Perform character movement
         key_pressed = pygame.key.get_pressed()
+
+        # Make a normalised vector of movement based on user input
+        move_x = 0.0
+        move_y = 0.0
         if key_pressed[pygame.K_w]:
-            self.y -= 1 * delta_time
+            move_y -= 1.0
         if key_pressed[pygame.K_s]:
-            self.y += 1 * delta_time
+            move_y += 1.0
         if key_pressed[pygame.K_d]:
-            self.x += 1 * delta_time
+            move_x += 1.0
         if key_pressed[pygame.K_a]:
-            self.x -= 1 * delta_time
+            move_x -= 1.0
+
+        if move_x is not 0.0 or move_y is not 0.0:
+            # Normalise
+            vec_length = distance((0, 0), (move_x, move_y))
+            move_x /= vec_length
+            move_y /= vec_length
+
+            # Accelerate according to the direction of the vector
+            self.x_velocity += move_x * self.acceleration * delta_time
+            self.y_velocity += move_y * self.acceleration * delta_time
+
+            # Cap player max speed
+            current_speed = distance((0, 0), (self.x_velocity, self.y_velocity))
+            if current_speed > self.max_speed:
+                self.x_velocity *= self.max_speed / current_speed
+                self.y_velocity *= self.max_speed / current_speed
+        else:
+            # Normalise to friction speed at max
+            current_speed = distance((0, 0), (self.x_velocity, self.y_velocity))  # player's current speed
+            new_length = self.friction * delta_time # desired length of the friction slowdown vector
+
+            # If the player is moving slower than the friction rate,
+            # cut the friction rate down to cancel out movement entirely
+            if current_speed < new_length:
+                new_length = current_speed * delta_time
+
+            if current_speed > 0:
+                move_x = -self.x_velocity * new_length / current_speed
+                move_y = -self.y_velocity * new_length / current_speed
+
+            # Decelerate accordingly
+            self.x_velocity += move_x * delta_time
+            self.y_velocity += move_y * delta_time
+
+        # Move player by velocity
+        self.move(self.x_velocity * delta_time, self.y_velocity * delta_time)
 
 
 # Constants
