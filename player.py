@@ -58,8 +58,10 @@ class PlayerClass(CharacterClass):
         # Scale character so we can see his beauty
         self.sprite = pygame.transform.scale(
                         self.sprite,
-                        (self.sprite.get_width() * 4,
-                         self.sprite.get_height() * 4))
+                        (self.sprite.get_width() * 3,
+                         self.sprite.get_height() * 3))
+        self.x = x
+        self.y = y
 
     def update(self):
         global delta_time
@@ -96,12 +98,12 @@ class PlayerClass(CharacterClass):
         else:
             # Normalise to friction speed at max
             current_speed = distance((0, 0), (self.x_velocity, self.y_velocity))  # player's current speed
-            new_length = self.friction * delta_time # desired length of the friction slowdown vector
+            new_length = self.friction # desired length of the friction slowdown vector
 
             # If the player is moving slower than the friction rate,
             # cut the friction rate down to cancel out movement entirely
             if current_speed < new_length:
-                new_length = current_speed * delta_time
+                new_length = current_speed
 
             if current_speed > 0:
                 move_x = -self.x_velocity * new_length / current_speed
