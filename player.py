@@ -15,23 +15,48 @@ def distance((x1, y1), (x2, y2)):
     return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
 
+class CollisionParams:
+    shape = 0  # Todo: Add sphere collision etc?
+    x = 0  # X offset of collision box in tiles (relative to parent object)
+    y = 0  # Y offset of collision box in tiles
+    width = 0  # Width of collision box in tiles
+    height = 0  # Height of collision box in tiles
+    solid = False
+
+
 class ObjectClass:
     # Main variables for characters
-    x = 0  # position is in game tiles
-    y = 0
-    sprite = None
+    x = 0  # in game tile units (1.0 = 1 tile)
+    y = 0  # in game tile units
+    sprite = None  # current object sprite (todo: animations etc)
+    collision = CollisionParams()  # collision data
 
     def __init__(self, x, y):
         """Initialise object at the given position"""
         self.x = x
         self.y = y
 
-
     def move(self, move_x, move_y):
         """Performs collision checking and moves object by offset of move_x and move_y if possible"""
-        self.x += move_x
-        self.y += move_y
-        # Todo: collision detection
+        # Decide where the object is (trying) to go
+        desired_x = self.x + move_x
+        desired_y = self.y + move_y
+        # Perform collision detection with objects
+        if self.collision.solid:
+            # Determine current area of our collision box
+            box_left = self.x + self.collision.x
+            box_top = self.y + self.collision.y
+            box_right = box_left + self.collision.width
+            box_bottom = box_top + self.collision.height
+            # Check with other objects
+            for object in objects:
+                obj_box_left = object.x + object.collision.x
+                obj_box_top = object.y + object.collision.y
+                obj_box_right = obj_box_left + object.collision.width
+                obj_box_bottom = obj_box_top + object.collision.height
+
+        self.x = desired_x
+        self.y = desired_y
 
     def render(self):
         """Renders the object sprite at its given position (overloadable function)"""
@@ -57,12 +82,14 @@ class PlayerClass(CharacterClass):
         self.sprite = pygame.image.load('graphics/game_character.png')
         self.sprite = self.sprite.convert(24)
         # Scale character so we can see his beauty
-        self.sprite = pygame.transform.scale(
+        self.sprite = pygame.transform.smoothscale(
                         self.sprite,
-                        (self.sprite.get_width() * 3,
-                         self.sprite.get_height() * 3))
+                        (TILE_WIDTH, TILE_HEIGHT))
         self.x = x
         self.y = y
+        self.collision.width = 1.0
+        self.collision.height = 1.0
+        self.collision.solid = True
 
     def update(self):
         global delta_time
@@ -121,10 +148,13 @@ class PlayerClass(CharacterClass):
 class PikachuStatue(ObjectClass):
     def __init__(self, x, y):
         self.sprite = pygame.image.load('graphics/pikachu.png')
+        self.sprite = pygame.transform.smoothscale(self.sprite, (TILE_WIDTH, TILE_HEIGHT))
         self.sprite = self.sprite.convert(24)
         self.x = x
         self.y = y
-
+        self.collision.width = 1.0
+        self.collision.height = 1.0
+        self.collision.solid = True
 
 
 # Constants
@@ -142,12 +172,10 @@ screen = pygame.display.set_mode((g_width, g_height))
 # Init character
 player = PlayerClass(0, 0)
 
-
 # Init Objects
-pikachus = list()
+objects = list()
 for i in xrange(10):
-    pikachus.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))
-
+    objects.append(PikachuStatue(random.randint(0, 10), random.randint(0, 10)))
 
 # Init main game parameters (todo: split all this into a class, no globals)
 tick_time = time.clock()  # time at the beginning of the current game tick
@@ -162,7 +190,6 @@ while running:
 
     delta_time = tick_time - last_time
 
-
     # Perform PyGame event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT or \
@@ -173,7 +200,9 @@ while running:
     player.update()
 
     # Perform rendering (todo: move into separate Render class)
-    for pikachu in pikachus:
-        pikachu.render()
+    screen.fill((0, 0, 0))
+
+    for objects in objects:
+        objects.render()
     player.render()
     pygame.display.flip()
