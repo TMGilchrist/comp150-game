@@ -44,9 +44,9 @@ class CharacterClass(ObjectClass):
 
 
 class PlayerClass(CharacterClass):
-    max_speed = 6.0  # The maximum running speed, in tiles/sec
-    acceleration = 10.0  # Rate of acceleration while running, in tiles/sec/sec
-    friction = 30.0  # Rate of slowdown when releasing movement keys
+    max_speed = 10.0  # The maximum running speed, in tiles/sec
+    acceleration = 30.0  # Rate of acceleration while running, in tiles/sec/sec
+    friction = 70.0  # Rate of slowdown when releasing movement keys
     x_velocity = 0.0  # Rate of movement per axis in tiles/sec
     y_velocity = 0.0
 
@@ -80,9 +80,9 @@ class PlayerClass(CharacterClass):
         if key_pressed[pygame.K_a]:
             move_x -= 1.0
 
-        if move_x is not 0.0 or move_y is not 0.0:
+        vec_length = distance((0, 0), (move_x, move_y))
+        if vec_length > 0.000:  # todo: determine why 'if vec_length is not 0.0' didn't work correctly
             # Normalise
-            vec_length = distance((0, 0), (move_x, move_y))
             move_x /= vec_length
             move_y /= vec_length
 
@@ -98,12 +98,12 @@ class PlayerClass(CharacterClass):
         else:
             # Normalise to friction speed at max
             current_speed = distance((0, 0), (self.x_velocity, self.y_velocity))  # player's current speed
-            new_length = self.friction # desired length of the friction slowdown vector
+            new_length = self.friction  # desired length of the friction slowdown vector
 
             # If the player is moving slower than the friction rate,
             # cut the friction rate down to cancel out movement entirely
-            if current_speed < new_length:
-                new_length = current_speed
+            if current_speed < new_length * delta_time:
+                new_length = current_speed / delta_time
 
             if current_speed > 0:
                 move_x = -self.x_velocity * new_length / current_speed
