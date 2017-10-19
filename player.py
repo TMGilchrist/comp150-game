@@ -38,14 +38,17 @@ class ObjectClass:
 
     def move(self, move_x, move_y):
         """Performs collision checking and moves object by offset of move_x and move_y if possible"""
+        global objects
+
         # Decide where the object is (trying) to go
         desired_x = self.x + move_x
         desired_y = self.y + move_y
+        collided = False
         # Perform collision detection with objects
         if self.collision.solid:
             # Determine current area of our collision box
-            box_left = self.x + self.collision.x
-            box_top = self.y + self.collision.y
+            box_left = desired_x + self.collision.x
+            box_top = desired_y + self.collision.y
             box_right = box_left + self.collision.width
             box_bottom = box_top + self.collision.height
             # Check with other objects
@@ -54,9 +57,15 @@ class ObjectClass:
                 obj_box_top = object.y + object.collision.y
                 obj_box_right = obj_box_left + object.collision.width
                 obj_box_bottom = obj_box_top + object.collision.height
+                if not (box_left >= obj_box_right or box_right <= obj_box_left or
+                        box_top >= obj_box_bottom or box_bottom <= obj_box_top):
+                    desired_x = self.x
+                    desired_y = self.y
+                    collided = True
 
         self.x = desired_x
         self.y = desired_y
+        return not collided
 
     def render(self):
         """Renders the object sprite at its given position (overloadable function)"""
@@ -70,9 +79,9 @@ class CharacterClass(ObjectClass):
 
 
 class PlayerClass(CharacterClass):
-    max_speed = 10.0  # The maximum running speed, in tiles/sec
-    acceleration = 30.0  # Rate of acceleration while running, in tiles/sec/sec
-    friction = 70.0  # Rate of slowdown when releasing movement keys
+    max_speed = 7.0  # The maximum running speed, in tiles/sec
+    acceleration = 35.0  # Rate of acceleration while running, in tiles/sec/sec
+    friction = 90.0  # Rate of slowdown when releasing movement keys
     x_velocity = 0.0  # Rate of movement per axis in tiles/sec
     y_velocity = 0.0
 
@@ -142,7 +151,9 @@ class PlayerClass(CharacterClass):
             self.y_velocity += move_y * delta_time
 
         # Move player by velocity
-        self.move(self.x_velocity * delta_time, self.y_velocity * delta_time)
+        if not (self.move(self.x_velocity * delta_time, self.y_velocity * delta_time)):
+            self.x_velocity = 0
+            self.y_velocity = 0
 
 
 class PikachuStatue(ObjectClass):
@@ -202,7 +213,7 @@ while running:
     # Perform rendering (todo: move into separate Render class)
     screen.fill((0, 0, 0))
 
-    for objects in objects:
-        objects.render()
+    for object in objects:
+        object.render()
     player.render()
     pygame.display.flip()
