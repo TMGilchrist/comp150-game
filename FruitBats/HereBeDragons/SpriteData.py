@@ -41,7 +41,7 @@ class PlayerClass(Character):  # The player class
     Y_VELOCITY = 0.0
 
     def __init__(self, InLocation, InHealth=100, InDamage=10, InArmour=2):
-        self.SPRITE = "ImageFiles/temp_player.jpg"
+        self.SPRITE = "ImageFiles/temp_player.png"
         """Init: Loads default player sprite and scales it up"""
         # Load character image
         self.health = InHealth
