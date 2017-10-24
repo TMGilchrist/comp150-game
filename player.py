@@ -37,7 +37,9 @@ class ObjectClass:
         self.y = y
 
     def move(self, move_x, move_y):
-        """Performs collision checking and moves object by offset of move_x and move_y if possible"""
+        """Performs collision checking and moves object by offset of move_x and
+           move_y if possible
+        """
         global objects
 
         # Decide where the object is (trying) to go
@@ -57,8 +59,10 @@ class ObjectClass:
                 obj_box_top = object.y + object.collision.y
                 obj_box_right = obj_box_left + object.collision.width
                 obj_box_bottom = obj_box_top + object.collision.height
-                if not (box_left >= obj_box_right or box_right <= obj_box_left or
-                        box_top >= obj_box_bottom or box_bottom <= obj_box_top):
+                if not (box_left >= obj_box_right or
+                        box_right <= obj_box_left or
+                        box_top >= obj_box_bottom or
+                        box_bottom <= obj_box_top):
                     desired_x = self.x
                     desired_y = self.y
                     collided = True
@@ -68,7 +72,7 @@ class ObjectClass:
         return not collided
 
     def render(self):
-        """Renders the object sprite at its given position (overloadable function)"""
+        """Renders the object (function overloadable by subclasses)"""
         if self.sprite is not None:
             screen.blit(self.sprite,
                         (self.x * TILE_WIDTH, self.y * TILE_HEIGHT))
@@ -118,7 +122,9 @@ class PlayerClass(CharacterClass):
             move_x -= 1.0
 
         vec_length = distance((0, 0), (move_x, move_y))
-        if vec_length > 0.000:  # todo: determine why 'if vec_length is not 0.0' didn't work correctly
+        # If the movement vector is nonzero, move; otherwise do friction
+        # todo: determine why 'if vec_length is not 0.0' didn't work correctly
+        if vec_length > 0.000:
             # Normalise
             move_x /= vec_length
             move_y /= vec_length
@@ -134,24 +140,29 @@ class PlayerClass(CharacterClass):
                 self.y_velocity *= self.max_speed / current_speed
         else:
             # Normalise to friction speed at max
-            current_speed = distance((0, 0), (self.x_velocity, self.y_velocity))  # player's current speed
-            new_length = self.friction  # desired length of the friction slowdown vector
+            current_speed = distance((0, 0),
+                                (self.x_velocity, self.y_velocity))
+            decel_speed = self.friction  # speed of deceleration
 
             # If the player is moving slower than the friction rate,
-            # cut the friction rate down to cancel out movement entirely
-            if current_speed < new_length * delta_time:
-                new_length = current_speed / delta_time
+            # cut the deceleration rate down to simply cancel out movement
+            if current_speed < decel_speed * delta_time:
+                decel_speed = current_speed / delta_time
 
             if current_speed > 0:
-                move_x = -self.x_velocity * new_length / current_speed
-                move_y = -self.y_velocity * new_length / current_speed
+                move_x = -self.x_velocity * decel_speed / current_speed
+                move_y = -self.y_velocity * decel_speed / current_speed
 
             # Decelerate accordingly
             self.x_velocity += move_x * delta_time
             self.y_velocity += move_y * delta_time
 
         # Move player by velocity
-        if not (self.move(self.x_velocity * delta_time, self.y_velocity * delta_time)):
+        moved = self.move(self.x_velocity * delta_time,
+                          self.y_velocity * delta_time)
+
+        # Stop velocity if player collided with something
+        if not moved:
             self.x_velocity = 0
             self.y_velocity = 0
 
@@ -159,7 +170,8 @@ class PlayerClass(CharacterClass):
 class PikachuStatue(ObjectClass):
     def __init__(self, x, y):
         self.sprite = pygame.image.load('graphics/pikachu.png')
-        self.sprite = pygame.transform.smoothscale(self.sprite, (TILE_WIDTH, TILE_HEIGHT))
+        self.sprite = pygame.transform.smoothscale(self.sprite,
+                                                   (TILE_WIDTH, TILE_HEIGHT))
         self.sprite = self.sprite.convert(24)
         self.x = x
         self.y = y
