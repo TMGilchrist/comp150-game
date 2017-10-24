@@ -3,7 +3,7 @@ import time
 import os
 print os.getcwd()
 
-from HereBeDragons import Const, MapGen, SpriteData
+import Const, MapGen, SpriteData
 
 pygame.init()
 screen = pygame.display.set_mode((800,500))

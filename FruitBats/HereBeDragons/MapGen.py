@@ -1,6 +1,6 @@
 import pygame
 import random
-from HereBeDragons import Const
+import Const
 
 
 class MapClass:
