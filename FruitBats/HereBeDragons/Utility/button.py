@@ -7,7 +7,7 @@ class Button:
     button_bounds = None
     parent_surface = None
 
-    def __init__(self, size, message, parent_surface, position):
+    def __init__(self, size, position, parent_surface, function, message):
 
         """
         Constructor method. Draws a button on a surface.
@@ -23,29 +23,49 @@ class Button:
         self.message = message
         self.parent_surface = parent_surface
         self.position = position
+        self.function = function
 
         self.button = pygame.Surface(self.size)
         self.button_bounds = self.button.get_rect()
         self.draw()
 
     def on_click(self):
+
+        """Method to be executed when the button is pressed"""
+
         print("clicked")
+        self.function()
 
     def check_click(self, mouse_position):
-        print("Click being checked")
 
-        if self.button_bounds.collidepoint(mouse_position) == True:
+        """
+        Checks if the mouse cursor is within the button. This should be called whenever the mouse is clicked.
+
+        Args:
+            mouse_position (tuple): The position of the mouse on the screen at the time the mouse button was pressed.
+        """
+
+        if self.button_bounds.collidepoint(mouse_position):
             self.on_click()
 
     def draw(self):
+
+        """Draws the button onto another surface"""
+
         self.button.fill((255, 0, 0))
         self.parent_surface.blit(self.button, self.position)
 
 
+"""Testing"""
+
+
+def test_use():
+    print("I'M BEING CALLED BY A BUTTON!")
+
 main_screen = pygame.display.set_mode((800, 600))
 main_screen.fill((222, 184, 135))
 
-test_button = Button((100, 100), "foo", main_screen, (0, 0))
+test_button = Button((100, 100), (0, 0), main_screen, test_use, "foo")
 
 pygame.display.flip()
 
