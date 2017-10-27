@@ -1,5 +1,9 @@
+import sys, os
+sys.path.append("//tremictssan.fal.ac.uk\userdata\TG190896\My Documents\Py2.7\HereBeDragons\Utility")
 import pygame
+
 from sprite import Sprite
+from button import Button
 import glob
 
 
@@ -20,7 +24,6 @@ class CharacterCreation:
     """
 
     path_to_assets = "../Assets"
-
     blank_component = pygame.image.load(path_to_assets + "/Sprites/blankComponent.png")
     blank_base = pygame.image.load(path_to_assets + "/Sprites/base/base1.png")
 
@@ -29,6 +32,12 @@ class CharacterCreation:
     player_char = 0
 
     body_choices = []
+
+    index = -1
+
+    # These should be put into a list
+    button_body = None
+    button_body_back = None
 
     # Constructor instantiates a sprite with a blank base
     def __init__(self, size, head_list, body_list):
@@ -56,14 +65,21 @@ class CharacterCreation:
         self.main_screen = pygame.display.set_mode(self.size)
         self.main_screen.fill((222, 184, 135))
 
+        self.button_body = Button((100, 100), (0, 0), (0, 255, 0), self.main_screen, self.scroll_components, [self, "body"], "foo")
+        # self.button_body_back = Button((100, 100), (0, 100), (255, 0, 0), self.main_screen, self.test_use, [] "foo")
+
         self.update_screen()
-        self.scroll_components("body")
+        # self.scroll_components("body")
 
         # Keep window open until user closes it
         done = False
 
         while not done:
             for event in pygame.event.get():
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.button_body.check_click(pygame.mouse.get_pos())        # Buttons should be added to a list and event checker iterates through list
+                    # self.button_body_back.check_click(pygame.mouse.get_pos())
 
                 if event.type == pygame.QUIT:
                     done = True
@@ -97,7 +113,24 @@ class CharacterCreation:
 
         return blank_sprite
 
+    # argument "direction" should be added, to specify if index is incremented or decremented
     def scroll_components(self, component):
+
+        """
+        Scrolls in a direction (back or forwards) through a list of component images and updates the player's sprite
+
+        Args:
+            component (string): The component to change when the player gives input (presses a 'button')
+
+        """
+
+        self.index += 1
+
+        # Update component of sprite with image from location in list
+        self.player_char.update([component], [getattr(self, component + "_choices")[self.index]])
+        self.update_screen()
+
+    def scroll_components_test(self, component):
 
         """
         Method to check for user input. This is a placeholder method to replicate the functionality of buttons.
@@ -134,6 +167,8 @@ class CharacterCreation:
             # Update component of sprite with image from location in list
             self.player_char.update([component], [getattr(self, component + "_choices")[index]])
             self.update_screen()
+
+
 
 
 # Calling as test
