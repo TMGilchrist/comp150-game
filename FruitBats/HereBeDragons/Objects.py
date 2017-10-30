@@ -1,6 +1,6 @@
 # import pygame
 
-from Map import MapClass
+from Map import MAP
 from Collision import CollisionParams
 
 
@@ -24,8 +24,8 @@ class Object:
         """Renders the object (function overloadable by subclasses)"""
         if self.sprite is not None:
             screen.blit(self.sprite,
-                        (self.x * MapClass.TILE_SIZE,
-                         self.y * MapClass.TILE_SIZE))
+                        (self.x * MAP.TILE_SIZE,
+                         self.y * MAP.TILE_SIZE))
 
     def move(self, move_x, move_y, object_list):
         """Performs collision checking and moves object by offset of move_x and

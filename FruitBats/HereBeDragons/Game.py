@@ -5,6 +5,7 @@ import pygame
 
 from Player import Player
 from TestObject import PikachuStatue
+from Map import MapClass
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -12,6 +13,7 @@ class Game:
     screen = None  # pygame screen
     objects = None  # list of active objects in the game
     player = None  # pointer to the player object
+    map = None    # MapClass object
     quitting = False
     SCREEN_WIDTH = 640
     SCREEN_HEIGHT = 480
@@ -23,6 +25,9 @@ class Game:
         # Init Python
         pygame.init()
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+
+        # Init map
+        self.map = MapClass()
 
         # Init character
         self.player = Player(0, 0)
@@ -56,7 +61,7 @@ class Game:
             self.player.update(self.delta_time, self.objects, None)
 
             # Render (todo: move into separate Render class?)
-            self.screen.fill((0, 0, 0))
+            self.screen.blit(self.map.img, (0, 0))
 
             for object in self.objects:
                 object.render(self.screen)
