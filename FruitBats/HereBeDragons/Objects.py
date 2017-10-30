@@ -54,6 +54,8 @@ class Object:
             for object in object_list:
                 if object == self:
                     continue  # don't collide with yourself plz
+                if not object.collision.solid:
+                    continue  # don't collide with nonsolids
                 obj_box_left = object.x + object.collision.x
                 obj_box_top = object.y + object.collision.y
                 obj_box_right = obj_box_left + object.collision.width

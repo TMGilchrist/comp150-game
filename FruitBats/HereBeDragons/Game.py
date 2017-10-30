@@ -5,8 +5,8 @@ import pygame
 
 from Player import Player
 from TestObject import PikachuStatue
+from Attack import Swipe
 from Enemy import ChaserEnemy
-
 class Game:
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since
@@ -38,6 +38,8 @@ class Game:
         for i in xrange(10):
             self.objects.append(PikachuStatue(random.randint(0, 10),
                                               random.randint(0, 10)))
+        # Add test sword
+        self.objects.append(Swipe(3, 3))
 
         # Init test enemy at 5,5
         self.objects.append(ChaserEnemy(3, 3))
