@@ -5,6 +5,7 @@ import pygame
 
 from Player import Player
 from TestObject import PikachuStatue
+from Attack import Swipe
 
 
 class Game:
@@ -36,6 +37,8 @@ class Game:
         for i in xrange(10):
             self.objects.append(PikachuStatue(random.randint(0, 10),
                                               random.randint(0, 10)))
+        # Add test sword
+        self.objects.append(Swipe(3, 3))
 
         # Init main game parameters
         self.start_time = time.clock()
@@ -58,6 +61,9 @@ class Game:
 
             # Update player and objects
             self.player.update(self.delta_time, self.objects, None)
+
+            for obj in self.objects:
+                obj.update(self.delta_time, self.objects, None)
 
             # Render (todo: move into separate Render class?)
             self.screen.fill((0, 0, 0))
