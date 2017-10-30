@@ -42,12 +42,11 @@ class Button:
 
         """
         Method to be executed when the button is pressed. self.function is called with the arguments passed to the
-        button when instantiated. Currently, if more than one argument (excluding self) is passed, the arguments must
-        be added below.
+        button when instantiated. The * passes all the items in button_args as arguments.
         """
 
         print("clicked")
-        self.function(self.function_args[1])
+        self.function(*self.function_args)
 
     def check_click(self, mouse_position):
 
