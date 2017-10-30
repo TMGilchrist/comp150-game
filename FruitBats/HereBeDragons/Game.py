@@ -5,7 +5,7 @@ import pygame
 
 from Player import Player
 from TestObject import PikachuStatue
-
+from Enemy import ChaserEnemy
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -33,9 +33,14 @@ class Game:
 
         # Init Objects
         self.objects = list()
+        self.objects.append(self.player)  # player is always the first item
+
         for i in xrange(10):
             self.objects.append(PikachuStatue(random.randint(0, 10),
                                               random.randint(0, 10)))
+
+        # Init test enemy at 5,5
+        self.objects.append(ChaserEnemy(3, 3))
 
         # Init main game parameters
         self.start_time = time.clock()
@@ -49,6 +54,10 @@ class Game:
 
             self.delta_time = self.tick_time - last_time
 
+            # Cap delta time to 10FPS to prevent gamebreaking bugs
+            if self.delta_time >= 0.1:
+                self.delta_time = 0.1
+
             # Perform PyGame event loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or \
@@ -56,8 +65,9 @@ class Game:
                          event.key == pygame.K_ESCAPE):
                     self.quitting = True
 
-            # Update player and objects
-            self.player.update(self.delta_time, self.objects, None)
+            # Update objects (including player)
+            for obj in self.objects:
+                obj.update(self.delta_time, self.player, self.objects, None)
 
             # Render (todo: move into separate Render class?)
             self.screen.fill((0, 0, 0))

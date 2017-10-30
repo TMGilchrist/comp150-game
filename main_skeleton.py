@@ -109,9 +109,10 @@ class Object:
     def __init__(self)
 
     # primary (overloadable) functions
-    def update(self, delta_time, object_list, map)
+    def update(self, delta_time, player, object_list, map)
     """update: called once per frame
             delta_time = time passed since last frame in seconds,
+            player = reference to the player
             object_list = list of all other objects,
             map = pointer to map class for collision checking, hazards etc
     """
@@ -140,8 +141,10 @@ class Player(Character):
     sprite_parts = list() # etc
 
 """Fully extendible mapclass, image size and spawn weights can be edited"""
-class MapClass:
+class MAP
     TILE_SIZE = 80  # size of game tiles in pixels
+
+class MapClass:
 
     def __init__(self, seed=0):
         """Initilizes Map class with a seed"""

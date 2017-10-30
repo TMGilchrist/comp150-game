@@ -8,11 +8,7 @@ import pygame
 from Characters import Character
 from Map import MapClass
 from Collision import CollisionParams
-
-
-def distance((x1, y1), (x2, y2)):
-    """Returns the distance between two points, in tile units"""
-    return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
+from Helpers import *
 
 
 class Player(Character):
@@ -34,7 +30,7 @@ class Player(Character):
         self.y = y
         self.collision = CollisionParams((10, 1), (39, 72), True)
 
-    def update(self, delta_time, object_list, map):
+    def update(self, delta_time, player, object_list, map):
         # Perform character movement
         key_pressed = pygame.key.get_pressed()
 
@@ -87,8 +83,8 @@ class Player(Character):
             self.y_velocity += move_y * delta_time
 
         # Move player by velocity
-        moved = self.move(self.x_velocity * delta_time,
-                          self.y_velocity * delta_time,
+        moved = self.move((self.x_velocity * delta_time,
+                          self.y_velocity * delta_time),
                           object_list)
 
         # Stop velocity if player collided with something

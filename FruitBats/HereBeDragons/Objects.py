@@ -17,7 +17,7 @@ class Object:
         self.y = y
         self.collision = CollisionParams((0.0, 0.0), (1.0, 1.0), True)
 
-    def update(self, delta_time, object_list, map):
+    def update(self, delta_time, player, object_list, map):
         pass  # to be overloaded by objects
 
     def render(self, screen):
@@ -27,9 +27,16 @@ class Object:
                         (self.x * MapClass.TILE_SIZE,
                          self.y * MapClass.TILE_SIZE))
 
-    def move(self, move_x, move_y, object_list):
+    def move(self, (move_x, move_y), object_list):
         """Performs collision checking and moves object by offset of move_x and
            move_y if possible
+
+           (move_x, move_y) -- How far to move, in tile units
+           object_list -- List of objects in the environment (for collision)
+
+           Todo: Push the player out of a surface in the opposite direction
+           to their attempted movement, return a vector portraying how much
+           they moved
         """
 
         # Decide where the object is (trying) to go
@@ -45,6 +52,8 @@ class Object:
             box_bottom = box_top + self.collision.height
             # Check with other objects
             for object in object_list:
+                if object == self:
+                    continue  # don't collide with yourself plz
                 obj_box_left = object.x + object.collision.x
                 obj_box_top = object.y + object.collision.y
                 obj_box_right = obj_box_left + object.collision.width
