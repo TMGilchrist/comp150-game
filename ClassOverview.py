@@ -104,9 +104,15 @@ class Object:
     x_velocity = 0.0  # rate of movement per axis in tiles/sec
     y_velocity = 0.0
     sprite = None  # current object sprite (todo: animations etc)
-    collision = CollisionParams()  # collision dimensions, whether solid, etc
+    collision = None  # collision dimensions, whether solid, etc
 
+    # init: IMPORTANT NOTE BELOW
     def __init__(self)
+    """init: initialises object. MAKE SURE to initialise collision if 
+       you overload this--or it may crash! (todo: add collision==None
+       checks by default; define None as 'non-solid'?)
+       To instantiate collision: collision = CollisionParams(parameters)
+    """
 
     # primary (overloadable) functions
     def update(self, delta_time, object_list, map)
