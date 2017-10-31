@@ -60,8 +60,8 @@ class Object:
             else:
                 # Draw regular sprite
                 screen.blit(self.sprite,
-                        (self.x * MapClass.TILE_SIZE,
-                         self.y * MapClass.TILE_SIZE))
+                            (self.x * MapClass.TILE_SIZE,
+                             self.y * MapClass.TILE_SIZE))
 
     def move(self, (move_x, move_y), object_list):
         """Performs collision checking and moves object by offset of move_x and
