@@ -20,9 +20,8 @@ class Swipe(Object):  # todo: load swipe animation
     def update(self, delta_time, player, object_list, map):
         mouse_x = float(pygame.mouse.get_pos()[0]) / MapClass.TILE_SIZE
         mouse_y = float(pygame.mouse.get_pos()[1]) / MapClass.TILE_SIZE
-        self.angle = float(math.atan2((self.y - mouse_y), (mouse_x - self.x)))
-        self.angle = float(math.degrees(self.angle) - 90)
-        self.sprite = pygame.transform.rotate(self.original_sprite, self.angle)
+        angle = float(math.atan2((self.y - mouse_y), (mouse_x - self.x)))
+        self.sprite_angle = float(math.degrees(angle) - 90)
 
 #    def attack(self):
  #       self.attack = False

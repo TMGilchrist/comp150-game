@@ -1,7 +1,10 @@
-# import pygame
+import math
+
+import pygame
 
 from Map import MapClass
 from Collision import CollisionParams
+from Helpers import Vector
 
 
 class Object:
@@ -9,6 +12,8 @@ class Object:
     x = 0  # in game tile units (1.0 = 1 tile)
     y = 0  # in game tile units
     sprite = None  # current object sprite (todo: animations etc)
+    sprite_angle = 0  # angle of rotation for this sprite in degrees
+    sprite_centre = None  # used only for rotations
     collision = None  # collision data (must be set in initialiser!)
 
     def __init__(self, x, y):
@@ -23,7 +28,38 @@ class Object:
     def render(self, screen):
         """Renders the object (function overloadable by subclasses)"""
         if self.sprite is not None:
-            screen.blit(self.sprite,
+            if self.sprite_angle is not 0:
+                # Clamp sprite_angle to 0 <= x < 360 with math magic
+                self.sprite_angle -= int(self.sprite_angle / 360) * 360
+                if self.sprite_angle < 0:
+                    self.sprite_angle -= int((self.sprite_angle / 360) - 1) \
+                                            * 360
+
+                # Draw rotated sprite
+                rotated_sprite = pygame.transform.rotate(self.sprite,
+                                                         self.sprite_angle)
+
+                # Place by top left...
+                place_x = self.x * MapClass.TILE_SIZE
+                place_y = self.y * MapClass.TILE_SIZE
+
+                # Move to centre...
+                place_x -= rotated_sprite.get_width() / 2
+                place_y -= rotated_sprite.get_height() / 2
+
+                # Move to origin
+                # TODO--Origin rotation, so hard
+                #sprite_centre = Vector(0, 0)
+                #if isinstance(sprite_centre, Vector):
+                #    place_x -= math.sin(math.radians(self.sprite_angle)) * (sprite_centre.x - rotated_sprite.get_width() / 2)
+                #    place_y -= math.cos(math.radians(self.sprite_angle)) * (sprite_centre.y - rotated_sprite.get_height() / 2)
+
+                # Blit!
+                pygame.draw.circle(screen, (255, 0, 0), (int(self.x*MapClass.TILE_SIZE), int(self.y*MapClass.TILE_SIZE)), 2, 1)
+                screen.blit(rotated_sprite, (place_x, place_y))
+            else:
+                # Draw regular sprite
+                screen.blit(self.sprite,
                         (self.x * MapClass.TILE_SIZE,
                          self.y * MapClass.TILE_SIZE))
 

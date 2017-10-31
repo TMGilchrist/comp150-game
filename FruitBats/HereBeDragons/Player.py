@@ -87,6 +87,12 @@ class Player(Character):
                           self.y_velocity * delta_time),
                           object_list)
 
+        # Spin player (test)
+        self.sprite_angle += 45 * delta_time
+
+        if self.sprite_angle >= 360:
+            self.sprite_angle -= 360
+
         # Stop velocity if player collided with something
         if not moved:
             self.x_velocity = 0
