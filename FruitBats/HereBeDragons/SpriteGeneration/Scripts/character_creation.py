@@ -1,13 +1,13 @@
-import sys, os
-sys.path.append("//tremictssan.fal.ac.uk\userdata\TG190896\My Documents\Py2.7\HereBeDragons\Utility")
 import pygame
 
 from sprite import Sprite
 from button import Button
-import glob
+from get_images import GetImages
 
 
 class CharacterCreation:
+
+    # Need to add a function to save the sprite.
 
     """
     CharacterCreation class. This class displays a character creation window and allows the user to edit the apperance
@@ -27,49 +27,61 @@ class CharacterCreation:
     blank_component = pygame.image.load(path_to_assets + "/Sprites/blankComponent.png")
     blank_base = pygame.image.load(path_to_assets + "/Sprites/base/base1.png")
 
-    main_screen = 0
+    main_screen = None
+    background_colour = (222, 184, 135)
+    buttons = []
 
-    player_char = 0
+    char_position = (326, 236)
+
+    player_char = None
 
     body_choices = []
+    hair_choices = []
+    legs_choices = []
 
-    index = -1
+    body_index = -1
+    hair_index = -1
+    legs_index = -1
 
-    # These should be put into a list
-    button_body = None
-    button_body_back = None
+    body_choices_length = 0
+    hair_choices_length = 0
+    legs_choices_length = 0
 
     # Constructor instantiates a sprite with a blank base
-    def __init__(self, size, head_list, body_list):
+    def __init__(self, size, hair_list, body_list, legs_list):
 
         """
         Constructor method.
 
         Args:
             size (tuple): The size in pixels of the character creation window.
-            head_list (list of images): The images that can be chosen for the character's head.
+            hair_list (list of images): The images that can be chosen for the character's head.
             body_list (list of images): The images that can be chosen for the character's body.
+            legs_list (list of images): The images that can be chosen for the character's legs.
         """
 
         self.size = size
-        # self.head_list = head_list
+        self.hair_choices = hair_list
         self.body_choices = body_list
+        self.legs_choices = legs_list
+
+        self.body_choices_length = len(self.body_choices)
+        self.hair_choices_length = len(self.hair_choices)
+        self.legs_choices_length = len(self.legs_choices)
+
+        self.read_sprite_data("player_sprite_data.txt")
         self.player_char = self.load_blank_sprite()
 
-    # Draw the character creation window
     def draw_win(self):
 
         """Main method for the class. This creates the character creation window and checks for player input."""
 
         print("Drawing screen for first time")
         self.main_screen = pygame.display.set_mode(self.size)
-        self.main_screen.fill((222, 184, 135))
+        self.main_screen.fill(self.background_colour)
 
-        self.button_body = Button((100, 100), (0, 0), (0, 255, 0), self.main_screen, self.scroll_components, [self, "body"], "foo")
-        # self.button_body_back = Button((100, 100), (0, 100), (255, 0, 0), self.main_screen, self.test_use, [] "foo")
-
+        self.create_buttons()
         self.update_screen()
-        # self.scroll_components("body")
 
         # Keep window open until user closes it
         done = False
@@ -77,9 +89,10 @@ class CharacterCreation:
         while not done:
             for event in pygame.event.get():
 
+                # Each button checks if it was clicked
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.button_body.check_click(pygame.mouse.get_pos())        # Buttons should be added to a list and event checker iterates through list
-                    # self.button_body_back.check_click(pygame.mouse.get_pos())
+                    for button in self.buttons:
+                        button.check_click(pygame.mouse.get_pos())
 
                 if event.type == pygame.QUIT:
                     done = True
@@ -92,12 +105,11 @@ class CharacterCreation:
         """Updates the character creation screen. Blits the character sprite to the screen and updates it."""
 
         # Update Screen
-        self.main_screen.blit(self.player_char.image, (400, 300))
+        self.main_screen.blit(self.player_char.image, self.char_position)
         pygame.display.flip()
 
         print("Screen updated")
 
-    # Method returns a sprite base
     def load_blank_sprite(self):
 
         """
@@ -108,81 +120,113 @@ class CharacterCreation:
         """
 
         # Create and draw a new sprite with a base image and blank components
-        blank_sprite = Sprite((64, 64), pygame.transform.scale(self.blank_base, (64, 64)), self.blank_component, self.blank_component, self.blank_component, self.blank_component, 0)
+        # blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.blank_component, self.blank_component, self.blank_component, self.blank_component, 0)
+
+        blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.legs_choices[self.legs_index],
+                                                                  self.body_choices[self.body_index], self.hair_choices[self.hair_index], self.blank_component, 0)
+
         blank_sprite.draw()
 
         return blank_sprite
 
-    # argument "direction" should be added, to specify if index is incremented or decremented
-    def scroll_components(self, component):
+    def scroll_components(self, component, direction):
 
         """
-        Scrolls in a direction (back or forwards) through a list of component images and updates the player's sprite
+        Scrolls in a direction (backwards or forwards) through a list of component images and updates the player's sprite
 
         Args:
             component (string): The component to change when the player gives input (presses a 'button')
-
+            direction (int): 1 = scrolling forward in list, -1 = scrolling backwards in list.
         """
 
-        self.index += 1
+        # Get the index of the relevant component list
+        index = getattr(self, component + "_index")
+        list_length = getattr(self, component + "_choices_length")
+
+        # Move through list
+        if direction == 1:
+            index += 1
+
+        elif direction == -1:
+            index -= 1
+
+        # If index exceeds list bounds, reset to 0
+        if (index >= list_length) or (index <= -list_length):
+            print("Index at max! " + str(list_length))
+            index = 0
+        else:
+            print("Index = " + str(index))
+
+        # Update the index of the relevant component
+        setattr(self, component + "_index", index)
 
         # Update component of sprite with image from location in list
-        self.player_char.update([component], [getattr(self, component + "_choices")[self.index]])
+        self.player_char.update([component], [getattr(self, component + "_choices")[index]])
         self.update_screen()
 
-    def scroll_components_test(self, component):
+    def create_buttons(self):
 
         """
-        Method to check for user input. This is a placeholder method to replicate the functionality of buttons.
-        Inputting 1 will scroll forward though the list of component images and -1 will scroll backwards. Any other input
-        will exit the function.
-
-        Args:
-            component (string): The component to change when the player gives input (presses a 'button')
-
+        Instantiates all the buttons needed for the character creation window.
+        The buttons are positioned based on the positioning of the player character.
+        Each button is also appended to the list of buttons.
         """
 
-        print("Scroll components running")
-        fake_button = 1
-        index = -1
+        # Create new buttons
 
-        while True:
-            for event in pygame.event.get():
-                pass  # clear the event loop by doing nothing
+        right = (self.char_position[0] + 150)
+        left = (self.char_position[0] - 100)
+        y = self.char_position[1]
 
-            fake_button = int(raw_input("Input 1 for scroll forwards, -1 for scroll back"))
+        # Hair options
+        self.button_hair = Button((50, 50), (right, y - 100), (0, 255, 0), self.main_screen, self.scroll_components, ["hair", 1], "foo")
+        self.button_hair_back = Button((50, 50), (left, y - 100), (255, 0, 0), self.main_screen, self.scroll_components, ["hair", -1], "foo")
 
-            if fake_button == 1:
-                index += 1
+        # Body options
+        self.button_body = Button((50, 50), (right, y), (0, 255, 0), self.main_screen, self.scroll_components, ["body", 1], "foo")
+        self.button_body_back = Button((50, 50), (left, y), (255, 0, 0), self.main_screen, self.scroll_components, ["body", -1], "foo")
 
-            elif fake_button == -1:
-                index -= 1
+        # Leg options
+        self.button_legs = Button((50, 50), (right, y + 100), (0, 255, 0), self.main_screen, self.scroll_components, ["legs", 1], "foo")
+        self.button_legs_back = Button((50, 50), (left, y + 100), (255, 0, 0), self.main_screen, self.scroll_components, ["legs", -1], "foo")
 
-            else:
-                break
+        # Add new buttons to the list of buttons
+        self.buttons.append(self.button_hair)
+        self.buttons.append(self.button_hair_back)
 
-            print("index = " + str(index))
-            print("Updating sprite")
+        self.buttons.append(self.button_body)
+        self.buttons.append(self.button_body_back)
 
-            # Update component of sprite with image from location in list
-            self.player_char.update([component], [getattr(self, component + "_choices")[index]])
-            self.update_screen()
+        self.buttons.append(self.button_legs)
+        self.buttons.append(self.button_legs_back)
 
+    def save_sprite_data(self, save_file):
 
+        """Creates or overwrites the save file, updating the index position when the player saved their sprite."""
+
+        with open(save_file, "w") as f:
+            f.write("hair_index " + str(self.hair_index) + "\n")
+            f.write("body_index " + str(self.body_index) + "\n")
+            f.write("legs_index " + str(self.legs_index) + "\n")
+            f.close()
+
+    def read_sprite_data(self, save_file):
+
+        """Reads the save file and sets the appropriate index value to the saved values."""
+
+        with open(save_file) as f:
+            for line in f:
+                (key, val) = line.split()
+                setattr(self, key, int(val))
 
 
 # Calling as test
-bodies = []
+images = GetImages("../Assets", ".png", (128, 128))
 
-for filename in glob.glob("../Assets/Sprites/body/*.png"):
-    bodies.append(pygame.transform.scale(pygame.image.load(filename), (64, 64)))
+test_window = CharacterCreation((800, 600), images.hair, images.body, images.legs)
 
-test_window = CharacterCreation((800, 600), 0, bodies)
 test_window.draw_win()
-
-# test_window.scroll_components("body")
-
-
+test_window.save_sprite_data("player_sprite_data.txt")
 
 
 

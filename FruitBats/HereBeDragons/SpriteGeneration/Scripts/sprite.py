@@ -4,64 +4,62 @@ import pygame
 class Sprite:
 
     """
-    Sprite Class. This class contains methods for drawing, updating and saving a sprite as a single image.
+    Sprite Class. This class contains methods for drawing, updating and saving a sprite as a single image. Needs a render function!
 
     Attributes:
         image (pygame.Surface): This is the image for the sprite in the form of a surface which can be redrawn if the sprite is updated.
     """
 
     # The image used for the sprite
-    image = 0
+    image = None
 
-    # Initialise new sprite with component images
-    def __init__(self, size, base, legs, body, head, feet, weapon):
+    def __init__(self, size, background_colour, base, legs, body, hair, feet, weapon):
 
         """
         Constructor for sprite class.
 
         Args:
             size (tuple): The size of the sprite in pixels.
-            base (image): The image to use for the sprite base.
-            legs (image): The image to use for the sprite's legs.
-            body (image): The image to use for the sprite's body.
-            head (image): The image to use for the sprite's head.
-            feet (image): The image to use for the sprite's feet.
-            weapon (image): The image to use for the sprite's weapon. Note that in the current implementation this
-                            is always passed a placeholder of 0, as weapon sprites have not been added to the assets folder.
-                            Similarily, the weapon image is not blitted to the sprite image in the draw functions, as there is no image.
+            background_colour (colour): The colour, including alpha value, of the background of the sprite image.
+            base (pygame.Surface): The image to use for the sprite base.
+            legs (pygame.Surface): The image to use for the sprite's legs.
+            body (pygame.Surface): The image to use for the sprite's body.
+            hair (pygame.Surface): The image to use for the sprite's head.
+            feet (pygame.Surface): The image to use for the sprite's feet.
+            weapon (pygame.Surface): The image to use for the sprite's weapon. Note that in the current implementation this
+                                     is always passed a placeholder of 0, as weapon sprites have not been added to the assets folder.
+                                     Similarily, the weapon image is not blitted to the sprite image in the draw functions, as there is no image.
         """
 
         self.size = size
+        self.background_colour = background_colour
         self.base = base
         self.legs = legs
         self.body = body
-        self.head = head
+        self.hair = hair
         self.feet = feet
         self.weapon = weapon
 
-        self.sprite_base = pygame.Surface(self.size, pygame.SRCALPHA, 32)
-        self.sprite_base.set_alpha(255)
+        print("Sprite body is " + str(self.body))
 
-    # Draw component images onto a base surface then save the surface as a single sprite
+        self.sprite_base = pygame.Surface(self.size, pygame.SRCALPHA, 32)
+        #self.sprite_base.set_alpha(255)
+
     def draw(self):
 
         """Draws the sprite's component images onto a PyGame surface and assigns it to the image property."""
 
         # clear surface
-        self.sprite_base.fill(  )
+        self.sprite_base.fill(self.background_colour)
 
         self.sprite_base.blit(self.base, (0, 0))
         self.sprite_base.blit(self.legs, (0, 0))
         self.sprite_base.blit(self.body, (0, 0))
-        self.sprite_base.blit(self.head, (0, 0))
+        self.sprite_base.blit(self.hair, (0, 0))
         self.sprite_base.blit(self.feet, (0, 0))
 
-        # Save sprite
         self.image = self.sprite_base
 
-        # print(self.__doc__)
-
-    # Draw component images onto a base surface then save the surface as a single sprite
     def draw_with_position(self, base_pos, body_pos, legs_pos, head_pos):
 
         """
@@ -78,13 +76,12 @@ class Sprite:
         self.sprite_base.blit(self.base, base_pos)
         self.sprite_base.blit(self.legs, legs_pos)
         self.sprite_base.blit(self.body, body_pos)
-        self.sprite_base.blit(self.head, head_pos)
+        self.sprite_base.blit(self.hair, head_pos)
         self.sprite_base.blit(self.feet, (0, 0))
 
         # Save sprite
         self.image = self.sprite_base
 
-    # Takes a list of properties (string) to update and a list of values (images) corresponding to each property
     def update(self, to_update, new_values):
 
         """
@@ -100,7 +97,6 @@ class Sprite:
 
         self.draw()
 
-    # Save sprite with incrementing filename based on a .txt file of existing names
     def save_with_id(self, save_path, file_type):
 
         """
