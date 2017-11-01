@@ -13,7 +13,7 @@ class Object:
     y = 0  # in game tile units
     sprite = None  # current object sprite (todo: animations etc)
     sprite_angle = 0  # angle of rotation for this sprite in degrees
-    sprite_centre = None  # used only for rotations
+    sprite_origin = None  # origin of sprite
     collision = None  # collision data (instantiate this in __init__)
 
     def __init__(self, x, y):
@@ -53,17 +53,17 @@ class Object:
                 centre_x = self.sprite.get_width() / 2
                 centre_y = self.sprite.get_height() / 2
 
-                if isinstance(self.sprite_centre, Vector):
+                if isinstance(self.sprite_origin, Vector):
                     # Perform a shift by the inverted origin, rotated
                     sine = math.sin(math.radians(self.sprite_angle))
                     cosine = math.cos(math.radians(self.sprite_angle))
 
                     # Shift along the X pixels by origin X
-                    place_x -= cosine * (self.sprite_centre.x - centre_x)
-                    place_y += sine * (self.sprite_centre.x - centre_x)
+                    place_x -= cosine * (self.sprite_origin.x - centre_x)
+                    place_y += sine * (self.sprite_origin.x - centre_x)
                     # Shift along the Y pixels by origin Y
-                    place_x -= sine * (self.sprite_centre.y - centre_y)
-                    place_y -= cosine * (self.sprite_centre.y - centre_y)
+                    place_x -= sine * (self.sprite_origin.y - centre_y)
+                    place_y -= cosine * (self.sprite_origin.y - centre_y)
 
                 # Move to origin
                 # TODO--Origin rotation, so hard
@@ -71,10 +71,17 @@ class Object:
                 # Blit!
                 screen.blit(rotated_sprite, (place_x, place_y))
             else:
-                # Draw regular sprite
-                screen.blit(self.sprite,
-                            (self.x * MapClass.TILE_SIZE,
-                             self.y * MapClass.TILE_SIZE))
+                if isinstance(self.sprite_origin, Vector):
+                    # Draw sprite at origin
+                    screen.blit(
+                        self.sprite,
+                        (self.x * MapClass.TILE_SIZE - self.sprite_origin.x,
+                         self.y * MapClass.TILE_SIZE - self.sprite_origin.y))
+                else:
+                    # Draw regular sprite
+                    screen.blit(self.sprite,
+                                (self.x * MapClass.TILE_SIZE,
+                                 self.y * MapClass.TILE_SIZE))
 
     def move(self, (move_x, move_y), object_list):
         """Performs collision checking and moves object by offset of
