@@ -10,15 +10,9 @@ class Sprite:
         image (pygame.Surface): This is the image for the sprite in the form of a surface which can be redrawn if the sprite is updated.
     """
 
-    path_to_assets = "../Assets"
-    blank_component = pygame.image.load(path_to_assets + "/Sprites/blankComponent.png")
-
-    # background_colour = (222, 184, 135)
-
     # The image used for the sprite
     image = None
 
-    # Initialise new sprite with component images
     def __init__(self, size, background_colour, base, legs, body, hair, feet, weapon):
 
         """
@@ -26,15 +20,15 @@ class Sprite:
 
         Args:
             size (tuple): The size of the sprite in pixels.
-            background (colour): The colour, including alpha value, of the background of the sprite image.
-            base (image): The image to use for the sprite base.
-            legs (image): The image to use for the sprite's legs.
-            body (image): The image to use for the sprite's body.
-            hair (image): The image to use for the sprite's head.
-            feet (image): The image to use for the sprite's feet.
-            weapon (image): The image to use for the sprite's weapon. Note that in the current implementation this
-                            is always passed a placeholder of 0, as weapon sprites have not been added to the assets folder.
-                            Similarily, the weapon image is not blitted to the sprite image in the draw functions, as there is no image.
+            background_colour (colour): The colour, including alpha value, of the background of the sprite image.
+            base (pygame.Surface): The image to use for the sprite base.
+            legs (pygame.Surface): The image to use for the sprite's legs.
+            body (pygame.Surface): The image to use for the sprite's body.
+            hair (pygame.Surface): The image to use for the sprite's head.
+            feet (pygame.Surface): The image to use for the sprite's feet.
+            weapon (pygame.Surface): The image to use for the sprite's weapon. Note that in the current implementation this
+                                     is always passed a placeholder of 0, as weapon sprites have not been added to the assets folder.
+                                     Similarily, the weapon image is not blitted to the sprite image in the draw functions, as there is no image.
         """
 
         self.size = size
@@ -46,28 +40,16 @@ class Sprite:
         self.feet = feet
         self.weapon = weapon
 
+        print("Sprite body is " + str(self.body))
+
         self.sprite_base = pygame.Surface(self.size, pygame.SRCALPHA, 32)
         #self.sprite_base.set_alpha(255)
 
-
-    # Draw component images onto a base surface then save the surface as a single sprite
     def draw(self):
 
         """Draws the sprite's component images onto a PyGame surface and assigns it to the image property."""
 
         # clear surface
-
-
-
-        # self.sprite_base = pygame.Surface((self.sprite_base.get_width(), self.sprite_base.get_height()), depth=32, flags=pygame.SRCALPHA)
-
-        # self.sprite_base.fill((255, 255, 255, 0))
-        # self.sprite_base.set_alpha(0)
-        #self.sprite_base.fill((255, 255, 255, 0), None, pygame.BLEND_SUB)
-
-        # Temporary to stop overlapping. Easiest solution = passing this fill colour as argument to sprite constructor.
-        # self.sprite_base.fill((222, 184, 135))
-
         self.sprite_base.fill(self.background_colour)
 
         self.sprite_base.blit(self.base, (0, 0))
@@ -76,15 +58,8 @@ class Sprite:
         self.sprite_base.blit(self.hair, (0, 0))
         self.sprite_base.blit(self.feet, (0, 0))
 
-
-
-        # Save sprite
         self.image = self.sprite_base
 
-        #
-        # print(self.__doc__)
-
-    # Draw component images onto a base surface then save the surface as a single sprite
     def draw_with_position(self, base_pos, body_pos, legs_pos, head_pos):
 
         """
@@ -107,7 +82,6 @@ class Sprite:
         # Save sprite
         self.image = self.sprite_base
 
-    # Takes a list of properties (string) to update and a list of values (images) corresponding to each property
     def update(self, to_update, new_values):
 
         """
@@ -123,7 +97,6 @@ class Sprite:
 
         self.draw()
 
-    # Save sprite with incrementing filename based on a .txt file of existing names
     def save_with_id(self, save_path, file_type):
 
         """

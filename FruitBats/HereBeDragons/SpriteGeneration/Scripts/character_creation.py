@@ -1,10 +1,8 @@
-import sys
-sys.path.append("//tremictssan.fal.ac.uk\userdata\TG190896\My Documents\Py2.7\HereBeDragons\Utility")
 import pygame
 
 from sprite import Sprite
 from button import Button
-import glob
+from get_images import GetImages
 
 
 class CharacterCreation:
@@ -49,10 +47,6 @@ class CharacterCreation:
     hair_choices_length = 0
     legs_choices_length = 0
 
-    # These should be put into a list
-    # button_body = None
-    # button_body_back = None
-
     # Constructor instantiates a sprite with a blank base
     def __init__(self, size, hair_list, body_list, legs_list):
 
@@ -63,6 +57,7 @@ class CharacterCreation:
             size (tuple): The size in pixels of the character creation window.
             hair_list (list of images): The images that can be chosen for the character's head.
             body_list (list of images): The images that can be chosen for the character's body.
+            legs_list (list of images): The images that can be chosen for the character's legs.
         """
 
         self.size = size
@@ -74,6 +69,7 @@ class CharacterCreation:
         self.hair_choices_length = len(self.hair_choices)
         self.legs_choices_length = len(self.legs_choices)
 
+        self.read_sprite_data("player_sprite_data.txt")
         self.player_char = self.load_blank_sprite()
 
     def draw_win(self):
@@ -85,7 +81,6 @@ class CharacterCreation:
         self.main_screen.fill(self.background_colour)
 
         self.create_buttons()
-
         self.update_screen()
 
         # Keep window open until user closes it
@@ -125,7 +120,11 @@ class CharacterCreation:
         """
 
         # Create and draw a new sprite with a base image and blank components
-        blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.blank_component, self.blank_component, self.blank_component, self.blank_component, 0)
+        # blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.blank_component, self.blank_component, self.blank_component, self.blank_component, 0)
+
+        blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.legs_choices[self.legs_index],
+                                                                  self.body_choices[self.body_index], self.hair_choices[self.hair_index], self.blank_component, 0)
+
         blank_sprite.draw()
 
         return blank_sprite
@@ -201,24 +200,33 @@ class CharacterCreation:
         self.buttons.append(self.button_legs)
         self.buttons.append(self.button_legs_back)
 
+    def save_sprite_data(self, save_file):
+
+        """Creates or overwrites the save file, updating the index position when the player saved their sprite."""
+
+        with open(save_file, "w") as f:
+            f.write("hair_index " + str(self.hair_index) + "\n")
+            f.write("body_index " + str(self.body_index) + "\n")
+            f.write("legs_index " + str(self.legs_index) + "\n")
+            f.close()
+
+    def read_sprite_data(self, save_file):
+
+        """Reads the save file and sets the appropriate index value to the saved values."""
+
+        with open(save_file) as f:
+            for line in f:
+                (key, val) = line.split()
+                setattr(self, key, int(val))
+
 
 # Calling as test
-bodies = []
-hair = []
-legs = []
+images = GetImages("../Assets", ".png", (128, 128))
 
-for filename in glob.glob("../Assets/Sprites/body/*.png"):
-    bodies.append(pygame.transform.scale(pygame.image.load(filename), (128, 128)))
+test_window = CharacterCreation((800, 600), images.hair, images.body, images.legs)
 
-for filename in glob.glob("../Assets/Sprites/hair/*.png"):
-    hair.append(pygame.transform.scale(pygame.image.load(filename), (128, 128)))
-
-for filename in glob.glob("../Assets/Sprites/legs/*.png"):
-    legs.append(pygame.transform.scale(pygame.image.load(filename), (128, 128)))
-
-test_window = CharacterCreation((800, 600), hair, bodies, legs)
 test_window.draw_win()
-
+test_window.save_sprite_data("player_sprite_data.txt")
 
 
 

@@ -3,6 +3,16 @@ import pygame
 
 class Button:
 
+    """
+    Button Class. This class creates a simple button that can be passed a function to execute when clicked.
+
+    Attributes:
+        button (pygame.Surface): The surface used to represent the button.
+        button_bounds (pygame.Rect): The rectangle formed by the button.
+        parent_surface (pygame.Surface): The surface onto which to blit the button.
+        button_args (list): The arguments to be passed to the function called in on_click.
+    """
+
     button = None
     button_bounds = None
     parent_surface = None
@@ -22,8 +32,7 @@ class Button:
                                       passing the function name or it will try and execute the function.
             function_args (list): A list of arguments to be passed to function. The value at [0] will be the instance of
                                   the class passing the value, so only [1] or higher should  be used.
-            message (string): Message to display on the button.
-
+            message (string): Message to display on the button. Currently not implemented!
         """
 
         self.size = size
@@ -70,32 +79,4 @@ class Button:
         self.parent_surface.blit(self.button, self.position)
 
 
-"""Testing"""
 
-"""
-def test_use():
-    print("I'M BEING CALLED BY A BUTTON!")
-
-main_screen = pygame.display.set_mode((800, 600))
-main_screen.fill((222, 184, 135))
-
-test_button = Button((100, 100), (0, 0), (0, 255, 0), main_screen, test_use, "foo")
-
-pygame.display.flip()
-
-# Keep window open until user closes it
-done = False
-
-while not done:
-    for event in pygame.event.get():
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            test_button.check_click(pygame.mouse.get_pos())
-
-        if event.type == pygame.QUIT:
-            done = True
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            done = True
-
-"""
