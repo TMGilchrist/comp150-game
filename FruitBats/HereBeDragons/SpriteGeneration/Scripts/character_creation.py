@@ -119,14 +119,10 @@ class CharacterCreation:
             blank_sprite (Sprite): A Sprite with base image and blank components.
         """
 
-        # Create and draw a new sprite with a base image and blank components
-        # blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.blank_component, self.blank_component, self.blank_component, self.blank_component, 0)
-
+        # Create and draw a new sprite with a base image and the last used components
         blank_sprite = Sprite((128, 128), self.background_colour, pygame.transform.scale(self.blank_base, (128, 128)), self.legs_choices[self.legs_index],
                                                                   self.body_choices[self.body_index], self.hair_choices[self.hair_index], self.blank_component, 0)
-
         blank_sprite.draw()
-
         return blank_sprite
 
     def scroll_components(self, component, direction):
