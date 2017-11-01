@@ -111,7 +111,7 @@ class Sprite:
 
         sprite_id = 0
 
-        with open("spriteNames.txt", "a+") as f:
+        with open("sprite_names.txt", "a+") as f:
             for line in f:
                 sprite_id += 1
 
