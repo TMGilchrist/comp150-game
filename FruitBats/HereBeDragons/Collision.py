@@ -1,4 +1,4 @@
-from Map import MapClass
+from Map import MAP
 
 class CollisionParams:
     shape = 0  # Todo: Add sphere collision etc?
@@ -17,8 +17,8 @@ class CollisionParams:
             solid: (bool) Whether the collision box is currently solid
         Returns: none
         """
-        self.x = float(x) / float(MapClass.TILE_SIZE)
-        self.y = float(y) / float(MapClass.TILE_SIZE)
-        self.width = float(width) / float(MapClass.TILE_SIZE)
-        self.height = float(height) / float(MapClass.TILE_SIZE)
+        self.x = float(x) / float(MAP.TILE_SIZE)
+        self.y = float(y) / float(MAP.TILE_SIZE)
+        self.width = float(width) / float(MAP.TILE_SIZE)
+        self.height = float(height) / float(MAP.TILE_SIZE)
         self.solid = solid

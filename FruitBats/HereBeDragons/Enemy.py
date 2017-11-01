@@ -1,16 +1,14 @@
-import time
-import random
-
 import pygame
 
 from Characters import Character
 from Helpers import *
 from Collision import CollisionParams
 
+
 class ChaserEnemy(Character):
     detection_range = 5  # range, in tiles, before engaging with player
-    acceleration = 20
-    velocity = None
+    acceleration = 20  # rate of acceleration, in tiles/sec/sec
+    velocity = None  # current speed, as a Vector
     chasing = False  # whether currently chasing the player or not
 
     def __init__(self, x, y):

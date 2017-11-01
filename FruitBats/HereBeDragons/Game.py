@@ -7,6 +7,8 @@ from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
 from Enemy import ChaserEnemy
+from Map import MapClass
+
 class Game:
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since
@@ -15,6 +17,7 @@ class Game:
     screen = None   # PyGame screen
     objects = None  # list of active objects in the game
     player = None   # pointer to the player object
+    map = None    # MapClass object
     quitting = False
     SCREEN_WIDTH = 640
     SCREEN_HEIGHT = 480
@@ -23,18 +26,24 @@ class Game:
         self.run()
 
     def run(self):
+        """Runs the game -- game closes when this function ends.
+           To be called on startup."""
         # Init Python
         pygame.init()
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
                                                self.SCREEN_HEIGHT))
 
+        # Init map
+        self.map = MapClass()
+
         # Init character
         self.player = Player(0, 0)
 
-        # Init Objects
+        # Init objects and player
         self.objects = list()
         self.objects.append(self.player)  # player is always the first item
 
+        # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
             self.objects.append(PikachuStatue(random.randint(0, 10),
                                               random.randint(0, 10)))
@@ -72,7 +81,8 @@ class Game:
                 obj.update(self.delta_time, self.player, self.objects, None)
 
             # Render (todo: move into separate Render class?)
-            self.screen.fill((0, 0, 0))
+            self.screen.blit(self.map.img, (0, 0))
+
 
             for obj in self.objects:
                 obj.render(self.screen)
@@ -81,4 +91,5 @@ class Game:
             # Splat to screen
             pygame.display.flip()
 
-game = Game()
+# Startup game!
+Game()

@@ -3,7 +3,7 @@ import math
 
 from Objects import Object
 from Collision import CollisionParams
-from Map import MapClass
+from Map import MapClass, MAP
 
 
 class Swipe(Object):  # todo: load swipe animation
@@ -22,9 +22,10 @@ class Swipe(Object):  # todo: load swipe animation
         self.collision = CollisionParams((0, 0), (32, 32), False)
 
     def update(self, delta_time, player, object_list, map):
-        mouse_x = float(pygame.mouse.get_pos()[0]) / MapClass.TILE_SIZE
-        mouse_y = float(pygame.mouse.get_pos()[1]) / MapClass.TILE_SIZE
-        angle_to_mouse = float(math.atan2((self.y - mouse_y), (mouse_x - self.x)))
+        mouse_x = float(pygame.mouse.get_pos()[0]) / MAP.TILE_SIZE
+        mouse_y = float(pygame.mouse.get_pos()[1]) / MAP.TILE_SIZE
+        angle_to_mouse = float(math.atan2((self.y - mouse_y),
+                                          (mouse_x - self.x)))
         if not self.swiping:
             self.sprite_angle = float(math.degrees(angle_to_mouse) - 90)
         if pygame.mouse.get_pressed()[0]:

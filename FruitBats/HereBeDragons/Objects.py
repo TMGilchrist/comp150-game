@@ -2,7 +2,7 @@ import math
 
 import pygame
 
-from Map import MapClass
+from Map import MapClass, MAP
 from Collision import CollisionParams
 from Helpers import Vector
 
@@ -12,9 +12,10 @@ class Object:
     x = 0  # in game tile units (1.0 = 1 tile)
     y = 0  # in game tile units
     sprite = None  # current object sprite (todo: animations etc)
+    collision = None  # collision data (None=no collision/ghost)
     sprite_angle = 0  # angle of rotation for this sprite in degrees
-    sprite_centre = None  # used only for rotations
-    collision = None  # collision data (must be set in initialiser!)
+    sprite_origin = None  # origin of sprite
+    collision = None  # collision data (instantiate this in __init__)
 
     def __init__(self, x, y):
         """Initialise object at the given position"""
@@ -34,53 +35,74 @@ class Object:
                 if self.sprite_angle < 0:
                     self.sprite_angle -= int((self.sprite_angle / 360) - 1) \
                                             * 360
-
                 # Draw rotated sprite
                 rotated_sprite = pygame.transform.rotate(self.sprite,
                                                          self.sprite_angle)
 
-                # Place by top left...
-                place_x = self.x * MapClass.TILE_SIZE
-                place_y = self.y * MapClass.TILE_SIZE
+                # Behold my somehow-rotate-around-an-origin code!
+                # Declare X and Y position to draw...
+                place_x = self.x * MAP.TILE_SIZE
+                place_y = self.y * MAP.TILE_SIZE
 
-                # Move to centre...
+                # Move back to centre of rotated image, which is always
+                # static
                 place_x -= rotated_sprite.get_width() / 2
                 place_y -= rotated_sprite.get_height() / 2
 
+                # Find the centre of the original image
+                centre_x = self.sprite.get_width() / 2
+                centre_y = self.sprite.get_height() / 2
+
+                if isinstance(self.sprite_origin, Vector):
+                    # Perform a shift by the inverted origin, rotated
+                    sine = math.sin(math.radians(self.sprite_angle))
+                    cosine = math.cos(math.radians(self.sprite_angle))
+
+                    # Shift along the X pixels by origin X
+                    place_x -= cosine * (self.sprite_origin.x - centre_x)
+                    place_y += sine * (self.sprite_origin.x - centre_x)
+                    # Shift along the Y pixels by origin Y
+                    place_x -= sine * (self.sprite_origin.y - centre_y)
+                    place_y -= cosine * (self.sprite_origin.y - centre_y)
+
                 # Move to origin
                 # TODO--Origin rotation, so hard
-                #sprite_centre = Vector(0, 0)
-                #if isinstance(sprite_centre, Vector):
-                #    place_x -= math.sin(math.radians(self.sprite_angle)) * (sprite_centre.x - rotated_sprite.get_width() / 2)
-                #    place_y -= math.cos(math.radians(self.sprite_angle)) * (sprite_centre.y - rotated_sprite.get_height() / 2)
 
                 # Blit!
-                pygame.draw.circle(screen, (255, 0, 0), (int(self.x*MapClass.TILE_SIZE), int(self.y*MapClass.TILE_SIZE)), 2, 1)
                 screen.blit(rotated_sprite, (place_x, place_y))
             else:
-                # Draw regular sprite
-                screen.blit(self.sprite,
-                            (self.x * MapClass.TILE_SIZE,
-                             self.y * MapClass.TILE_SIZE))
+                if isinstance(self.sprite_origin, Vector):
+                    # Draw sprite at origin
+                    screen.blit(
+                        self.sprite,
+                        (self.x * MapClass.TILE_SIZE - self.sprite_origin.x,
+                         self.y * MapClass.TILE_SIZE - self.sprite_origin.y))
+                else:
+                    # Draw regular sprite
+                    screen.blit(self.sprite,
+                                (self.x * MAP.TILE_SIZE,
+                                 self.y * MAP.TILE_SIZE))
 
     def move(self, (move_x, move_y), object_list):
-        """Performs collision checking and moves object by offset of move_x and
-           move_y if possible
+        """Performs collision checking and moves object by offset of
+           move_x and move_y if possible
 
            (move_x, move_y) -- How far to move, in tile units
-           object_list -- List of objects in the environment (for collision)
+           object_list -- List of objects in the environment (for
+                          collision)
 
-           Todo: Push the player out of a surface in the opposite direction
-           to their attempted movement, return a vector portraying how much
-           they moved
+           Todo: Push the player out of a surface in the opposite
+           direction to their attempted movement, return a vector
+           portraying how much they moved
         """
 
         # Decide where the object is (trying) to go
         desired_x = self.x + move_x
         desired_y = self.y + move_y
         collided = False
+
         # Perform collision detection with objects
-        if self.collision.solid:
+        if self.collision and self.collision.solid:
             # Determine current area of our collision box
             box_left = desired_x + self.collision.x
             box_top = desired_y + self.collision.y
@@ -90,7 +112,7 @@ class Object:
             for object in object_list:
                 if object == self:
                     continue  # don't collide with yourself plz
-                if not object.collision.solid:
+                if not (object.collision and object.collision.solid):
                     continue  # don't collide with nonsolids
                 obj_box_left = object.x + object.collision.x
                 obj_box_top = object.y + object.collision.y

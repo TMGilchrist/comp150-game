@@ -1,7 +1,7 @@
 import pygame
 
 from Objects import Object
-from Map import MapClass
+from Map import MAP
 from Collision import CollisionParams
 
 
@@ -10,11 +10,11 @@ class PikachuStatue(Object):
         self.sprite = pygame.image.load('graphics/pikachu.png')
         self.sprite = pygame.transform.smoothscale(
                         self.sprite,
-                        (MapClass.TILE_SIZE, MapClass.TILE_SIZE))
+                        (MAP.TILE_SIZE, MAP.TILE_SIZE))
         self.sprite = self.sprite.convert(24)
         self.x = x
         self.y = y
         self.collision = CollisionParams((0.0, 0.0),
-                                         (MapClass.TILE_SIZE,
-                                          MapClass.TILE_SIZE),
+                                         (MAP.TILE_SIZE,
+                                          MAP.TILE_SIZE),
                                          True)
