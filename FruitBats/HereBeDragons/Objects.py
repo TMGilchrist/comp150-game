@@ -1,6 +1,9 @@
 import math
 
-from Map import MapClass, MAPfrom Collision import CollisionParams
+import pygame
+
+from Map import MapClass, MAP
+from Collision import CollisionParams
 from Helpers import Vector
 
 
@@ -38,8 +41,8 @@ class Object:
 
                 # Behold my somehow-rotate-around-an-origin code!
                 # Declare X and Y position to draw...
-                place_x = self.x * MapClass.TILE_SIZE
-                place_y = self.y * MapClass.TILE_SIZE
+                place_x = self.x * MAP.TILE_SIZE
+                place_y = self.y * MAP.TILE_SIZE
 
                 # Move back to centre of rotated image, which is always
                 # static
@@ -77,8 +80,8 @@ class Object:
                 else:
                     # Draw regular sprite
                     screen.blit(self.sprite,
-                                (self.x * MapClass.TILE_SIZE,
-                                 self.y * MapClass.TILE_SIZE))
+                                (self.x * MAP.TILE_SIZE,
+                                 self.y * MAP.TILE_SIZE))
 
     def move(self, (move_x, move_y), object_list):
         """Performs collision checking and moves object by offset of
@@ -109,7 +112,7 @@ class Object:
             for object in object_list:
                 if object == self:
                     continue  # don't collide with yourself plz
-                if not (object.collision or object.collision.solid):
+                if not (object.collision and object.collision.solid):
                     continue  # don't collide with nonsolids
                 obj_box_left = object.x + object.collision.x
                 obj_box_top = object.y + object.collision.y

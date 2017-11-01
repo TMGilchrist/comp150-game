@@ -6,7 +6,9 @@ import pygame
 from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
-from Enemy import ChaserEnemyfrom Map import MapClass
+from Enemy import ChaserEnemy
+from Map import MapClass
+
 class Game:
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since
