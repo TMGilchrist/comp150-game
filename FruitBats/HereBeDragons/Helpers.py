@@ -2,6 +2,8 @@ import math
 
 
 class Vector:
+    """Vector container class for xy coordinates
+       Can also be used as a tuple."""
     x = 0.0
     y = 0.0
 
@@ -14,6 +16,7 @@ class Vector:
             return Vector(0, 0)  # prevent division by zero
 
     def length(self):
+        """Returns the length of the vector as a float"""
         return math.sqrt(self.x * self.x + self.y * self.y)
 
     def __init__(self, x, y):
@@ -45,7 +48,7 @@ class Vector:
 # Global functions for simple math tasks
 # Functions accepting tuples can also accept vectors
 def distance((x1, y1), (x2, y2)):
-    """Returns the distance between two points, in tile units"""
+    """Returns the distance between two points"""
     return math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
 
 

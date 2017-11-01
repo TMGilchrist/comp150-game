@@ -7,6 +7,7 @@ from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
 from Enemy import ChaserEnemy
+
 class Game:
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since
@@ -23,6 +24,8 @@ class Game:
         self.run()
 
     def run(self):
+        """Runs the game -- game closes when this function ends.
+           To be called on startup."""
         # Init Python
         pygame.init()
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
@@ -31,10 +34,11 @@ class Game:
         # Init character
         self.player = Player(0, 0)
 
-        # Init Objects
+        # Init objects and player
         self.objects = list()
         self.objects.append(self.player)  # player is always the first item
 
+        # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
             self.objects.append(PikachuStatue(random.randint(0, 10),
                                               random.randint(0, 10)))
@@ -81,4 +85,5 @@ class Game:
             # Splat to screen
             pygame.display.flip()
 
-game = Game()
+# Startup game!
+Game()
