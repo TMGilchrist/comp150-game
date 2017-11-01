@@ -1,4 +1,5 @@
 import pygame
+import pickle
 
 
 class Sprite:
@@ -119,3 +120,5 @@ class Sprite:
             f.close()
 
         pygame.image.save(self.image, save_path + "/sprite" + str(sprite_id) + "." + file_type)
+
+
