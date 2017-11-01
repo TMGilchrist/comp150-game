@@ -1,4 +1,5 @@
 import pygame
+import pickle
 
 from sprite import Sprite
 from button import Button
@@ -7,7 +8,10 @@ from get_images import GetImages
 
 class CharacterCreation:
 
-    # Need to add a function to save the sprite.
+    # Window needs to close when save button is pressed! Trying to change components after saving will throw error.
+    # Serialize and deserialize methods should be in another module - possibly in Sprite class. Call with Sprite.serialize.
+    # Button in create_buttons shouldn't be properties - *I think*
+    # Update class docstring
 
     """
     CharacterCreation class. This class displays a character creation window and allows the user to edit the apperance
@@ -32,7 +36,6 @@ class CharacterCreation:
     buttons = []
 
     char_position = (326, 236)
-
     player_char = None
 
     body_choices = []
@@ -47,7 +50,9 @@ class CharacterCreation:
     hair_choices_length = 0
     legs_choices_length = 0
 
-    # Constructor instantiates a sprite with a blank base
+    loading = False
+    # loading = True
+
     def __init__(self, size, hair_list, body_list, legs_list):
 
         """
@@ -69,8 +74,13 @@ class CharacterCreation:
         self.hair_choices_length = len(self.hair_choices)
         self.legs_choices_length = len(self.legs_choices)
 
-        self.read_sprite_data("player_sprite_data.txt")
-        self.player_char = self.load_blank_sprite()
+        self.read_component_index("char_creation_index.txt")
+
+        if self.loading:
+            self.player_char = self.load_serialized_sprite("player_sprite")
+
+        else:
+            self.player_char = self.load_blank_sprite()
 
     def draw_win(self):
 
@@ -168,8 +178,11 @@ class CharacterCreation:
         Each button is also appended to the list of buttons.
         """
 
-        # Create new buttons
+        # Whole section could probably be neater. Prehaps make ScrollButton and object that inherits from Button with inital size, colour, function etc?
+        # Probably don't need to make each button an attribute as buttons can be accessed through buttons list.
 
+        # Create new buttons
+        center = (self.size[0] / 2), (self.size[1] / 2)
         right = (self.char_position[0] + 150)
         left = (self.char_position[0] - 100)
         y = self.char_position[1]
@@ -186,6 +199,9 @@ class CharacterCreation:
         self.button_legs = Button((50, 50), (right, y + 100), (0, 255, 0), self.main_screen, self.scroll_components, ["legs", 1], "foo")
         self.button_legs_back = Button((50, 50), (left, y + 100), (255, 0, 0), self.main_screen, self.scroll_components, ["legs", -1], "foo")
 
+        # Save/finish button
+        button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.main_screen, self.serialize_sprite, ["player_sprite", self.player_char], "foo")
+
         # Add new buttons to the list of buttons
         self.buttons.append(self.button_hair)
         self.buttons.append(self.button_hair_back)
@@ -196,7 +212,9 @@ class CharacterCreation:
         self.buttons.append(self.button_legs)
         self.buttons.append(self.button_legs_back)
 
-    def save_sprite_data(self, save_file):
+        self.buttons.append(button_save)
+
+    def save_component_index(self, save_file):
 
         """Creates or overwrites the save file, updating the index position when the player saved their sprite."""
 
@@ -206,7 +224,7 @@ class CharacterCreation:
             f.write("legs_index " + str(self.legs_index) + "\n")
             f.close()
 
-    def read_sprite_data(self, save_file):
+    def read_component_index(self, save_file):
 
         """Reads the save file and sets the appropriate index value to the saved values."""
 
@@ -215,14 +233,67 @@ class CharacterCreation:
                 (key, val) = line.split()
                 setattr(self, key, int(val))
 
+    def serialize_sprite(self, file, to_pickle):
+
+        """
+        Serialize (pickle) a Sprite instance. Because pygame Surfaces cannot be pickled,
+        each surface is converted to a string prior to pickling.
+
+        Args:
+              file (string): The name of the binary file where the serialized Sprite will be stored.
+              to_pickle (Sprite instance): The instance of Sprite to be pickled.
+        """
+
+        print("Sprite serialized")
+
+        binary_file = open(file + ".bin", mode="wb")
+
+        to_pickle.image = pygame.image.tostring(to_pickle.image, "RGBA")
+        to_pickle.base = pygame.image.tostring(to_pickle.base, "RGBA")
+        to_pickle.legs = pygame.image.tostring(to_pickle.legs, "RGBA")
+        to_pickle.body = pygame.image.tostring(to_pickle.body, "RGBA")
+        to_pickle.hair = pygame.image.tostring(to_pickle.hair, "RGBA")
+        to_pickle.feet = pygame.image.tostring(to_pickle.feet, "RGBA")
+
+        to_pickle.sprite_base = pygame.image.tostring(to_pickle.sprite_base, "RGBA")
+
+        pickle.dump(to_pickle, binary_file)
+        binary_file.close()
+
+    def load_serialized_sprite(self, file):
+
+        """
+        Deserialize (unpickle) a Sprite instance. As the Surfaces are pickled as strings, they must be converted back to
+        Surfaces after unpickling.
+
+        Args:
+             file (string): The name of the binary file from which to retrieve the serialized Sprite.
+
+        Returns:
+            loaded_sprite (Sprite): The instance of Sprite that was pickled.
+        """
+
+        binary_file = open(file + ".bin", mode="rb")
+        loaded_sprite = pickle.load(binary_file)
+        binary_file.close()
+
+        loaded_sprite.image = pygame.image.fromstring(loaded_sprite.image, loaded_sprite.size, "RGBA")
+        loaded_sprite.base = pygame.image.fromstring(loaded_sprite.base, loaded_sprite.size, "RGBA")
+        loaded_sprite.legs = pygame.image.fromstring(loaded_sprite.legs, loaded_sprite.size, "RGBA")
+        loaded_sprite.body = pygame.image.fromstring(loaded_sprite.body, loaded_sprite.size, "RGBA")
+        loaded_sprite.hair = pygame.image.fromstring(loaded_sprite.hair, loaded_sprite.size, "RGBA")
+        loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, (16, 16), "RGBA")            # No component set for feet therefore size has not been scaled up
+
+        loaded_sprite.sprite_base = pygame.image.fromstring(loaded_sprite.sprite_base, loaded_sprite.size, "RGBA")
+
+        return loaded_sprite
+
 
 # Calling as test
 images = GetImages("../Assets", ".png", (128, 128))
 
 test_window = CharacterCreation((800, 600), images.hair, images.body, images.legs)
-
 test_window.draw_win()
-test_window.save_sprite_data("player_sprite_data.txt")
 
-
+test_window.save_component_index("char_creation_index.txt")
 
