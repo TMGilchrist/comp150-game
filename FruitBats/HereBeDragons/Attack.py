@@ -11,7 +11,7 @@ class Swipe(Object):  # todo: load swipe animation
     swiping = False
     swipe_progress = 0
     swipe_location = None
-    swipe_direction = 1
+    swipe_direction = 0
     swipe_angle = 0
 
     def __init__(self, x, y):
@@ -29,18 +29,24 @@ class Swipe(Object):  # todo: load swipe animation
             self.sprite_angle = float(math.degrees(angle_to_mouse) - 90)
         if pygame.mouse.get_pressed()[0]:
             self.swiping = True
-            if self.swiping:
+            if self.swipe_direction == 0:
                 self.sprite_angle -= 360 * delta_time
                 self.swipe_angle += delta_time * 360
                 if self.swipe_angle >= 45:
-                    self.sprite_angle += 360 * delta_time
-                    self.swipe_angle -= delta_time * 360
+                    self.swipe_direction = 1
+            elif self.swipe_direction == 1:
+                self.sprite_angle += 360 * delta_time
+                self.swipe_angle -= delta_time * 360
                 if self.swipe_angle <= -45:
-                    self.sprite_angle -= 360 * delta_time
-                    self.swipe_angle += delta_time * 360
-                # print self.swipe_angle
+                    self.swipe_direction = -1
+            elif self.swipe_direction == -1:
+                self.sprite_angle -= 360 * delta_time
+                self.swipe_angle += delta_time * 360
+                if self.swipe_angle >= 45:
+                    self.swipe_direction = 1
         if not pygame.mouse.get_pressed()[0]:
             self.swiping = False
             self.swipe_angle = 0
+            self.swipe_direction = 0
 
 
