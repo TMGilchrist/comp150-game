@@ -8,23 +8,39 @@ from get_images import GetImages
 
 class CharacterCreation:
 
-    # Window needs to close when save button is pressed! Trying to change components after saving will throw error.
-    # Serialize and deserialize methods should be in another module - possibly in Sprite class. Call with Sprite.serialize.
-    # Button in create_buttons shouldn't be properties - *I think*
-    # Update class docstring
+    # index checkig to save the position is probably not necessary. Character creation menu doesn't really need to save user's position
 
     """
     CharacterCreation class. This class displays a character creation window and allows the user to edit the apperance
     of their character.
 
     Attributes:
-        path_to_assets (string): The file path to the assets folder. This should later be added to the constructor so it
-                                 can be passed in when the class is instantiated.
+        path_to_assets (string): The file path to the assets folder. This should later be added to the constructor so it can be passed in when the class is instantiated.
         blank_component (image): A blank image that is used as a placeholder
         blank_base (image): The image used for the base of the sprite
+
         main_screen (pygame.Display): The character creation window
+        background_colour (pygame.Colour): The colour for the main window.
+        buttons (list of Buttons): A list of the Buttons on the screen.
+
+        char_position (tuple): The position of the player_char on the screen.
         player_char (Sprite): The player character's Sprite. player_char.image used to access the image
-        body_choices (list of images): The images that the player can choose from for the body component.
+
+        body_choices (list of Surfaces): The images that the player can choose from for the body component.
+        hair_choices (list of Surfaces): The images that the player can choose from for the hair component.
+        legs_choices (list of Surfaces): The images that the player can choose from for the legs component.
+
+        body_index (int): The position in the body_choices array. Used to save the user's place.
+        hair_index (int): The position in the hair_choices array. Used to save the user's place.
+        legs_index (int): The position in the legs_choices array. Used to save the user's place.
+
+        # These are set in __init__ so that length only has to be calculated once.
+        body_choices_length (int): The length of the body_choices list.
+        hair_choices_length (int): The length of the hair_choices list.
+        legs_choices_length (int): The length of the legs_choices list.
+
+        loading (bool): Sets if the program loads the player_char from a serialized file. Mainly for testing.
+        running (bool): State of the pygame window. Window remains open while running is True.
     """
 
     path_to_assets = "../Assets"
@@ -50,8 +66,9 @@ class CharacterCreation:
     hair_choices_length = 0
     legs_choices_length = 0
 
-    loading = False
-    # loading = True
+    # loading = False
+    loading = True
+    running = True
 
     def __init__(self, size, hair_list, body_list, legs_list):
 
@@ -74,10 +91,12 @@ class CharacterCreation:
         self.hair_choices_length = len(self.hair_choices)
         self.legs_choices_length = len(self.legs_choices)
 
+        # Get the position in the component lists from the last session.
         self.read_component_index("char_creation_index.txt")
 
+        # Check if loading from serialized file. This should be temporary. For testing only.
         if self.loading:
-            self.player_char = self.load_serialized_sprite("player_sprite")
+            self.player_char = Sprite.deserialize("player_sprite")
 
         else:
             self.player_char = self.load_blank_sprite()
@@ -87,16 +106,16 @@ class CharacterCreation:
         """Main method for the class. This creates the character creation window and checks for player input."""
 
         print("Drawing screen for first time")
+
+        # Initialise display
         self.main_screen = pygame.display.set_mode(self.size)
         self.main_screen.fill(self.background_colour)
 
         self.create_buttons()
         self.update_screen()
 
-        # Keep window open until user closes it
-        done = False
-
-        while not done:
+        # Loop to keep window open and check for events
+        while self.running:
             for event in pygame.event.get():
 
                 # Each button checks if it was clicked
@@ -105,10 +124,10 @@ class CharacterCreation:
                         button.check_click(pygame.mouse.get_pos())
 
                 if event.type == pygame.QUIT:
-                    done = True
+                    self.running = False
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    done = True
+                    self.running = False
 
     def update_screen(self):
 
@@ -148,6 +167,7 @@ class CharacterCreation:
         # Get the index of the relevant component list
         index = getattr(self, component + "_index")
         list_length = getattr(self, component + "_choices_length")
+        # list_length = len(getattr(self, component + "_choices"))
 
         # Move through list
         if direction == 1:
@@ -178,8 +198,7 @@ class CharacterCreation:
         Each button is also appended to the list of buttons.
         """
 
-        # Whole section could probably be neater. Prehaps make ScrollButton and object that inherits from Button with inital size, colour, function etc?
-        # Probably don't need to make each button an attribute as buttons can be accessed through buttons list.
+        # Whole section is messy. Perhaps make ScrollButton an object that inherits from Button with initial size, colour, function etc?
 
         # Create new buttons
         center = (self.size[0] / 2), (self.size[1] / 2)
@@ -188,29 +207,29 @@ class CharacterCreation:
         y = self.char_position[1]
 
         # Hair options
-        self.button_hair = Button((50, 50), (right, y - 100), (0, 255, 0), self.main_screen, self.scroll_components, ["hair", 1], "foo")
-        self.button_hair_back = Button((50, 50), (left, y - 100), (255, 0, 0), self.main_screen, self.scroll_components, ["hair", -1], "foo")
+        button_hair = Button((50, 50), (right, y - 100), (0, 255, 0), self.main_screen, [self.scroll_components], [["hair", 1]], "foo")
+        button_hair_back = Button((50, 50), (left, y - 100), (255, 0, 0), self.main_screen, [self.scroll_components], [["hair", -1]], "foo")
 
         # Body options
-        self.button_body = Button((50, 50), (right, y), (0, 255, 0), self.main_screen, self.scroll_components, ["body", 1], "foo")
-        self.button_body_back = Button((50, 50), (left, y), (255, 0, 0), self.main_screen, self.scroll_components, ["body", -1], "foo")
+        button_body = Button((50, 50), (right, y), (0, 255, 0), self.main_screen, [self.scroll_components], [["body", 1]], "foo")
+        button_body_back = Button((50, 50), (left, y), (255, 0, 0), self.main_screen, [self.scroll_components], [["body", -1]], "foo")
 
         # Leg options
-        self.button_legs = Button((50, 50), (right, y + 100), (0, 255, 0), self.main_screen, self.scroll_components, ["legs", 1], "foo")
-        self.button_legs_back = Button((50, 50), (left, y + 100), (255, 0, 0), self.main_screen, self.scroll_components, ["legs", -1], "foo")
+        button_legs = Button((50, 50), (right, y + 100), (0, 255, 0), self.main_screen, [self.scroll_components], [["legs", 1]], "foo")
+        button_legs_back = Button((50, 50), (left, y + 100), (255, 0, 0), self.main_screen, [self.scroll_components], [["legs", -1]], "foo")
 
         # Save/finish button
-        button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.main_screen, self.serialize_sprite, ["player_sprite", self.player_char], "foo")
+        button_save = Button((100, 50), (center[0] - 50, center[1] + 200), (0, 0, 255), self.main_screen, [Sprite.serialize, self.exit], [["player_sprite", self.player_char], None], "foo")
 
         # Add new buttons to the list of buttons
-        self.buttons.append(self.button_hair)
-        self.buttons.append(self.button_hair_back)
+        self.buttons.append(button_hair)
+        self.buttons.append(button_hair_back)
 
-        self.buttons.append(self.button_body)
-        self.buttons.append(self.button_body_back)
+        self.buttons.append(button_body)
+        self.buttons.append(button_body_back)
 
-        self.buttons.append(self.button_legs)
-        self.buttons.append(self.button_legs_back)
+        self.buttons.append(button_legs)
+        self.buttons.append(button_legs_back)
 
         self.buttons.append(button_save)
 
@@ -233,60 +252,12 @@ class CharacterCreation:
                 (key, val) = line.split()
                 setattr(self, key, int(val))
 
-    def serialize_sprite(self, file, to_pickle):
+    def exit(self):
 
-        """
-        Serialize (pickle) a Sprite instance. Because pygame Surfaces cannot be pickled,
-        each surface is converted to a string prior to pickling.
+        """Closes the character creation window. This could be adapted to lead into the main game."""
 
-        Args:
-              file (string): The name of the binary file where the serialized Sprite will be stored.
-              to_pickle (Sprite instance): The instance of Sprite to be pickled.
-        """
-
-        print("Sprite serialized")
-
-        binary_file = open(file + ".bin", mode="wb")
-
-        to_pickle.image = pygame.image.tostring(to_pickle.image, "RGBA")
-        to_pickle.base = pygame.image.tostring(to_pickle.base, "RGBA")
-        to_pickle.legs = pygame.image.tostring(to_pickle.legs, "RGBA")
-        to_pickle.body = pygame.image.tostring(to_pickle.body, "RGBA")
-        to_pickle.hair = pygame.image.tostring(to_pickle.hair, "RGBA")
-        to_pickle.feet = pygame.image.tostring(to_pickle.feet, "RGBA")
-
-        to_pickle.sprite_base = pygame.image.tostring(to_pickle.sprite_base, "RGBA")
-
-        pickle.dump(to_pickle, binary_file)
-        binary_file.close()
-
-    def load_serialized_sprite(self, file):
-
-        """
-        Deserialize (unpickle) a Sprite instance. As the Surfaces are pickled as strings, they must be converted back to
-        Surfaces after unpickling.
-
-        Args:
-             file (string): The name of the binary file from which to retrieve the serialized Sprite.
-
-        Returns:
-            loaded_sprite (Sprite): The instance of Sprite that was pickled.
-        """
-
-        binary_file = open(file + ".bin", mode="rb")
-        loaded_sprite = pickle.load(binary_file)
-        binary_file.close()
-
-        loaded_sprite.image = pygame.image.fromstring(loaded_sprite.image, loaded_sprite.size, "RGBA")
-        loaded_sprite.base = pygame.image.fromstring(loaded_sprite.base, loaded_sprite.size, "RGBA")
-        loaded_sprite.legs = pygame.image.fromstring(loaded_sprite.legs, loaded_sprite.size, "RGBA")
-        loaded_sprite.body = pygame.image.fromstring(loaded_sprite.body, loaded_sprite.size, "RGBA")
-        loaded_sprite.hair = pygame.image.fromstring(loaded_sprite.hair, loaded_sprite.size, "RGBA")
-        loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, (16, 16), "RGBA")            # No component set for feet therefore size has not been scaled up
-
-        loaded_sprite.sprite_base = pygame.image.fromstring(loaded_sprite.sprite_base, loaded_sprite.size, "RGBA")
-
-        return loaded_sprite
+        print("Window Closed")
+        self.running = False
 
 
 # Calling as test
