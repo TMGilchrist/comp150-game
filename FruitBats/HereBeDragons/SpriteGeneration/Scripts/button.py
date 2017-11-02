@@ -16,7 +16,6 @@ class Button:
     button = None
     button_bounds = None
     parent_surface = None
-    button_args = []
 
     def __init__(self, size, position, colour, parent_surface, function, function_args, message):
 
@@ -28,10 +27,10 @@ class Button:
             position (tuple): The position at which to draw the button.
             colour (tuple): The RGB code for the colour of the button.
             parent_surface (pygame.Surface): The surface on which to draw the button.
-            function (function name): The function to be run when the button is pressed. Note, do not use () when
-                                      passing the function name or it will try and execute the function.
-            function_args (list): A list of arguments to be passed to function. The value at [0] will be the instance of
-                                  the class passing the value, so only [1] or higher should  be used.
+            function (list of function names): The function to be run when the button is pressed. Note, do not use () when
+                                               passing the function name or it will try and execute the function.
+            function_args (list of lists): Each list within this list contains the arguments to be passed to a function. The value at [0] will be the instance of
+                                           the class passing the value, so only [1] or higher should  be used.
             message (string): Message to display on the button. Currently not implemented!
         """
 
@@ -55,7 +54,17 @@ class Button:
         """
 
         print("clicked")
-        self.function(*self.function_args)
+
+        # If a function has been passed to the button, iterate through the list of functions
+        if self.function is not None:
+            for i in range(0, len(self.function)):
+
+                # Check if arguments have been passed for the function, if not, call without arguments
+                if self.function_args[i] is not None:
+                    self.function[i](*self.function_args[i])
+
+                else:
+                    self.function[i]()
 
     def check_click(self, mouse_position):
 

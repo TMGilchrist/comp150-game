@@ -8,11 +8,11 @@ class GetImages:
     GetImages class. This class is used to load the component images into lists in preperation for generating a random sprite.
 
     Attributes:
-        base (list) = list of images to be used for the sprite base
-        legs (list) = list of images to be used for the sprite legs
-        body (list) = list of images to be used for the sprite body
-        hair (list) = list of images to be used for the sprite hair
-        feet (list) = list of images to be used for the sprite feet  
+        base (list of Surfaces) = list of images to be used for the sprite base
+        legs (list of Surfaces) = list of images to be used for the sprite legs
+        body (list of Surfaces) = list of images to be used for the sprite body
+        hair (list of Surfaces) = list of images to be used for the sprite hair
+        feet (list of Surfaces) = list of images to be used for the sprite feet
     """
 
     base = []
