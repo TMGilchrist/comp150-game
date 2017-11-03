@@ -7,7 +7,8 @@ from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
 from Enemy import ChaserEnemy
-from Map import MapClass
+from Map import *
+from Fog import Fog
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -35,6 +36,9 @@ class Game:
 
         # Init map
         self.map = MapClass()
+
+        # Init fog
+        self.fog = Fog()
 
         # Init character
         self.player = Player(0, 0)
@@ -87,6 +91,10 @@ class Game:
             for obj in self.objects:
                 obj.render(self.screen)
             self.player.render(self.screen)
+
+            # Render fog
+            self.screen.blit(self.fog.fog, (self.player.x * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
+                                            self.player.y * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
 
             # Splat to screen
             pygame.display.flip()
