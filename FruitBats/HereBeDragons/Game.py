@@ -7,7 +7,8 @@ from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
 from Enemy import ChaserEnemy
-from Map import MapClass
+from Map import MapClass, MAP
+from Camera import Camera
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -15,9 +16,10 @@ class Game:
                     # the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
     screen = None   # PyGame screen
+    camera = None   # movable camera object
     objects = None  # list of active objects in the game
     player = None   # pointer to the player object
-    map = None    # MapClass object
+    map = None      # MapClass object
     quitting = False
     SCREEN_WIDTH = 640
     SCREEN_HEIGHT = 480
@@ -42,6 +44,9 @@ class Game:
         # Init objects and player
         self.objects = list()
         self.objects.append(self.player)  # player is always the first item
+
+        # Init camera
+        self.camera = Camera(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
@@ -78,15 +83,17 @@ class Game:
 
             # Update objects (including player)
             for obj in self.objects:
-                obj.update(self.delta_time, self.player, self.objects, None)
+                obj.update(self.delta_time, self.player, self.objects, map)
+
+            # Update camera
+            self.camera.update(self.delta_time, self.player, self.objects, map)
 
             # Render (todo: move into separate Render class?)
-            self.screen.blit(self.map.img, (0, 0))
-
+            self.screen.blit(self.map.img, (-self.camera.x * MAP.TILE_SIZE, -self.camera.y * MAP.TILE_SIZE))
 
             for obj in self.objects:
-                obj.render(self.screen)
-            self.player.render(self.screen)
+                obj.render(self.screen, self.camera)
+            self.player.render(self.screen, self.camera)
 
             # Splat to screen
             pygame.display.flip()
