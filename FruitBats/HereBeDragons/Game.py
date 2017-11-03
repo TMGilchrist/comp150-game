@@ -92,4 +92,4 @@ class Game:
             pygame.display.flip()
 
 # Startup game!
-Game()
+# Game()

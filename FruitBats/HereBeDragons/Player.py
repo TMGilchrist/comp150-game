@@ -66,7 +66,7 @@ class Player(Character):
         else:
             # Normalise to friction speed at max
             current_speed = distance((0, 0),
-                                (self.x_velocity, self.y_velocity))
+                                     (self.x_velocity, self.y_velocity))
             decel_speed = self.friction  # speed of deceleration
 
             # If the player is moving slower than the friction rate,
