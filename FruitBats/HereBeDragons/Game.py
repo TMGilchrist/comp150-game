@@ -7,9 +7,14 @@ from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
 from Enemy import ChaserEnemy
-from Map import *
-from Fog import Fog
+from Map import MapClass, MAP
+from Camera import Camera
+from Menu import *
 from Invent import *
+
+from SpriteGeneration import character_creation
+from SpriteGeneration import Sprite
+
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -18,12 +23,16 @@ class Game:
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
     t0 = time.time()
     screen = None   # PyGame screen
+    camera = None   # movable camera object
     objects = None  # list of active objects in the game
     player = None   # pointer to the player object
-    map = None    # MapClass object
+    map = None      # MapClass object
     quitting = False
-    SCREEN_WIDTH = 640
-    SCREEN_HEIGHT = 480
+    menu = None
+    SCREEN_WIDTH = 800  # 640
+    SCREEN_HEIGHT = 600  # 480
+
+    new_game = True    # If the player needs to create a character or not. For testing only currently.
 
     def __init__(self):
         self.run()
@@ -36,14 +45,21 @@ class Game:
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
                                                self.SCREEN_HEIGHT))
 
+        pygame.display.set_caption('Frontier')
+
+        menu = GameMenu(self.screen)
+        menu.run()
+
+        if self.new_game:
+            # Character creation goes here
+            character_creation.load_creation_window(self.screen)
+
         # Init map
         self.map = MapClass()
 
-        # Init fog
-        self.fog = Fog()
-
         # Init character
         self.player = Player(0, 0)
+        self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init inventory
         self.invent = Inventory()
@@ -51,6 +67,9 @@ class Game:
         # Init objects and player
         self.objects = list()
         self.objects.append(self.player)  # player is always the first item
+
+        # Init camera
+        self.camera = Camera(self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
 
         # Add test Pikachi (Pikachodes?) (plural?)
         for i in xrange(10):
@@ -96,14 +115,17 @@ class Game:
 
             # Update objects (including player)
             for obj in self.objects:
-                obj.update(self.delta_time, self.player, self.objects, None)
+                obj.update(self.delta_time, self.player, self.objects, map)
+
+            # Update camera
+            self.camera.update(self.delta_time, self.player, self.objects, map)
 
             # Render (todo: move into separate Render class?)
-            self.screen.blit(self.map.img, (0, 0))
+            self.screen.blit(self.map.img, (-self.camera.x * MAP.TILE_SIZE, -self.camera.y * MAP.TILE_SIZE))
 
             for obj in self.objects:
-                obj.render(self.screen)
-            self.player.render(self.screen)
+                obj.render(self.screen, self.camera)
+            self.player.render(self.screen, self.camera)
 
             # Render fog
             self.screen.blit(self.fog.surface, (self.player.x * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
