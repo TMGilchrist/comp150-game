@@ -7,8 +7,10 @@ from Player import Player
 from TestObject import PikachuStatue
 from Attack import Swipe
 from Enemy import ChaserEnemy
-from Map import *
-from Fog import Fog
+from Map import MapClass
+
+from SpriteGeneration import character_creation
+from SpriteGeneration import Sprite
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -20,8 +22,10 @@ class Game:
     player = None   # pointer to the player object
     map = None    # MapClass object
     quitting = False
-    SCREEN_WIDTH = 640
-    SCREEN_HEIGHT = 480
+    SCREEN_WIDTH = 800 #640
+    SCREEN_HEIGHT = 600 #480
+
+    new_game = True    # If the player needs to create a character or not. For testing only currently.
 
     def __init__(self):
         self.run()
@@ -34,14 +38,16 @@ class Game:
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
                                                self.SCREEN_HEIGHT))
 
+        if self.new_game:
+            # Character creation goes here
+            character_creation.load_creation_window(self.screen)
+
         # Init map
         self.map = MapClass()
 
-        # Init fog
-        self.fog = Fog()
-
         # Init character
         self.player = Player(0, 0)
+        self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init objects and player
         self.objects = list()
@@ -91,10 +97,6 @@ class Game:
             for obj in self.objects:
                 obj.render(self.screen)
             self.player.render(self.screen)
-
-            # Render fog
-            self.screen.blit(self.fog.fog, (self.player.x * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
-                                            self.player.y * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
 
             # Splat to screen
             pygame.display.flip()
