@@ -11,6 +11,7 @@ from Map import MapClass, MAP
 from Camera import Camera
 from Menu import *
 from Invent import *
+from Fog import Fog
 
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
@@ -56,6 +57,9 @@ class Game:
 
         # Init map
         self.map = MapClass()
+
+        # Init fog
+        self.fog = Fog()
 
         # Init character
         self.player = Player(0, 0)
@@ -128,8 +132,8 @@ class Game:
             self.player.render(self.screen, self.camera)
 
             # Render fog
-            self.screen.blit(self.fog.surface, (self.player.x * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
-                                                self.player.y * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
+            self.screen.blit(self.fog.surface, ((self.player.x - self.camera.x) * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
+                                                (self.player.y - self.camera.y) * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
 
             # Update inventory
             self.invent.update()

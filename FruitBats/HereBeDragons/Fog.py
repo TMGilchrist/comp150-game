@@ -5,8 +5,8 @@ from Player import *
 
 class Fog:
 
-    SCREEN_WIDTH = 640*3
-    SCREEN_HEIGHT = 480*3
+    SCREEN_WIDTH = 800*3
+    SCREEN_HEIGHT = 600*3
     surface = None
     day = True
 
