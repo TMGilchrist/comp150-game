@@ -129,3 +129,4 @@ class Object:
         self.x = desired_x
         self.y = desired_y
         return not collided
+
