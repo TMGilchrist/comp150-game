@@ -9,7 +9,6 @@ GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 
 
-
 class MenuItem(pygame.font.Font):
     def __init__(self, text, font=None, font_size=30,
                  font_color=WHITE, (pos_x, pos_y)=(0, 0)):
@@ -42,6 +41,9 @@ class MenuItem(pygame.font.Font):
 
 
 class GameMenu:
+
+    background_image = None
+
     def __init__(self, screen, items, funcs, font=None,
                  font_size=30, font_color=WHITE):
         self.screen = screen
@@ -118,8 +120,6 @@ class GameMenu:
             item.set_font_color(WHITE)
             item.set_italic(False)
 
-    global background_image
-
     background_image = pygame.image.load("ImageFiles/Background.png")
     background_image = background_image.convert(32)
 
@@ -149,7 +149,7 @@ class GameMenu:
             self.set_mouse_visibility()
 
             # Redraw the background
-            self.screen.blit(background_image, [0, 0])
+            self.screen.blit(self.background_image, [0, 0])
 
             for item in self.items:
                 if self.mouse_is_visible:
@@ -163,8 +163,7 @@ if __name__ == "__main__":
     # Creating the screen
     screen = pygame.display.set_mode((640, 480), 0, 32)
 
-    menu_items = ('Start', 'Load', 'Settings', 'Quit')
-    funcs = {'Start': Game,
+    funcs = {'New Game': Game,
              'Quit': sys.exit}
 
     pygame.display.set_caption('Game Menu')
