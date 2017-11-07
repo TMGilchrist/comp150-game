@@ -9,12 +9,14 @@ from Attack import Swipe
 from Enemy import ChaserEnemy
 from Map import *
 from Fog import Fog
+from Invent import *
 
 class Game:
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since
                     # the game started
     start_time = 0  # initial time.clock() value on startup (OS-dependent)
+    t0 = time.time()
     screen = None   # PyGame screen
     objects = None  # list of active objects in the game
     player = None   # pointer to the player object
@@ -43,6 +45,9 @@ class Game:
         # Init character
         self.player = Player(0, 0)
 
+        # Init inventory
+        self.invent = Inventory()
+
         # Init objects and player
         self.objects = list()
         self.objects.append(self.player)  # player is always the first item
@@ -69,6 +74,15 @@ class Game:
 
             self.delta_time = self.tick_time - last_time
 
+            # Change day to true or false every #seconds, calls fog function to update surface
+            seconds = 10
+            t1 = time.time()
+            dt = t1 - self.t0  # gets difference in start time and current time
+            if dt >= seconds:
+                self.fog.day = not self.fog.day
+                self.t0 = t1  # resets timer variable
+                self.fog.lift_fog()
+
             # Cap delta time to 10FPS to prevent gamebreaking bugs
             if self.delta_time >= 0.1:
                 self.delta_time = 0.1
@@ -87,14 +101,17 @@ class Game:
             # Render (todo: move into separate Render class?)
             self.screen.blit(self.map.img, (0, 0))
 
-
             for obj in self.objects:
                 obj.render(self.screen)
             self.player.render(self.screen)
 
             # Render fog
-            self.screen.blit(self.fog.fog, (self.player.x * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
-                                            self.player.y * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
+            self.screen.blit(self.fog.surface, (self.player.x * MAP.TILE_SIZE - int(self.SCREEN_WIDTH*1.5 - self.player.sprite.get_width()/2),
+                                                self.player.y * MAP.TILE_SIZE - int(self.SCREEN_HEIGHT*1.5 - self.player.sprite.get_height()/2)))
+
+            # Update inventory
+            self.invent.update()
+            self.invent.render_invent(self.screen)
 
             # Splat to screen
             pygame.display.flip()
