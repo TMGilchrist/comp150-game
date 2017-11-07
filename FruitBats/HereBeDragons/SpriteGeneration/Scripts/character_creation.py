@@ -1,3 +1,4 @@
+import sys
 import pygame
 import pickle
 
@@ -129,10 +130,10 @@ class CharacterCreation:
                         button.check_click(pygame.mouse.get_pos())
 
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    sys.exit()
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    self.running = False
+                    sys.exit()
 
     def update_screen(self):
 
