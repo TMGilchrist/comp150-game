@@ -1,4 +1,5 @@
 import pygame
+import pickle
 
 
 class Sprite:
@@ -12,6 +13,7 @@ class Sprite:
 
     # The image used for the sprite
     image = None
+    components = []
 
     def __init__(self, size, background_colour, base, legs, body, hair, feet, weapon):
 
@@ -43,7 +45,6 @@ class Sprite:
         print("Sprite body is " + str(self.body))
 
         self.sprite_base = pygame.Surface(self.size, pygame.SRCALPHA, 32)
-        #self.sprite_base.set_alpha(255)
 
     def draw(self):
 
@@ -82,7 +83,7 @@ class Sprite:
         # Save sprite
         self.image = self.sprite_base
 
-    def update(self, to_update, new_values):
+    def update(self, to_update, new_values, draw=True):
 
         """
         Updates the sprite image. Can be called with multiple values to change at once.
@@ -95,7 +96,20 @@ class Sprite:
         for i in range (0, len(to_update)):
             setattr(self, to_update[i], new_values[i])
 
-        self.draw()
+        if draw:
+            self.draw()
+
+    def resize(self, size):
+        self.size = size
+        self.image = pygame.transform.scale(self.image, size)
+        self.base = pygame.transform.scale(self.base, size)
+        self.legs = pygame.transform.scale(self.legs, size)
+        self.body = pygame.transform.scale(self.body, size)
+        self.hair = pygame.transform.scale(self.hair, size)
+        self.feet = pygame.transform.scale(self.feet, size)
+        # self.weapon = pygame.transform.scale(self.weapon, size)
+
+        self.sprite_base = pygame.transform.scale(self.sprite_base, size)
 
     def save_with_id(self, save_path, file_type):
 
@@ -119,3 +133,60 @@ class Sprite:
             f.close()
 
         pygame.image.save(self.image, save_path + "/sprite" + str(sprite_id) + "." + file_type)
+
+    @staticmethod
+    def serialize(file, to_pickle):
+
+        """
+        Serialize (pickle) a Sprite instance. Because pygame Surfaces cannot be pickled,
+        each surface is converted to a string prior to pickling.
+
+        Args:
+              file (string): The name of the binary file where the serialized Sprite will be stored.
+              to_pickle (Sprite instance): The instance of Sprite to be pickled.
+        """
+
+        print("Sprite serialized")
+
+        binary_file = open(file + ".bin", mode="wb")
+
+        to_pickle.image = pygame.image.tostring(to_pickle.image, "RGBA")
+        to_pickle.base = pygame.image.tostring(to_pickle.base, "RGBA")
+        to_pickle.legs = pygame.image.tostring(to_pickle.legs, "RGBA")
+        to_pickle.body = pygame.image.tostring(to_pickle.body, "RGBA")
+        to_pickle.hair = pygame.image.tostring(to_pickle.hair, "RGBA")
+        to_pickle.feet = pygame.image.tostring(to_pickle.feet, "RGBA")
+
+        to_pickle.sprite_base = pygame.image.tostring(to_pickle.sprite_base, "RGBA")
+
+        pickle.dump(to_pickle, binary_file)
+        binary_file.close()
+
+    @staticmethod
+    def deserialize(file):
+
+        """
+        Deserialize (unpickle) a Sprite instance. As the Surfaces are pickled as strings, they must be converted back to
+        Surfaces after unpickling.
+
+        Args:
+             file (string): The name of the binary file from which to retrieve the serialized Sprite.
+
+        Returns:
+            loaded_sprite (Sprite): The instance of Sprite that was pickled.
+        """
+
+        binary_file = open(file + ".bin", mode="rb")
+        loaded_sprite = pickle.load(binary_file)
+        binary_file.close()
+
+        loaded_sprite.image = pygame.image.fromstring(loaded_sprite.image, loaded_sprite.size, "RGBA")
+        loaded_sprite.base = pygame.image.fromstring(loaded_sprite.base, loaded_sprite.size, "RGBA")
+        loaded_sprite.legs = pygame.image.fromstring(loaded_sprite.legs, loaded_sprite.size, "RGBA")
+        loaded_sprite.body = pygame.image.fromstring(loaded_sprite.body, loaded_sprite.size, "RGBA")
+        loaded_sprite.hair = pygame.image.fromstring(loaded_sprite.hair, loaded_sprite.size, "RGBA")
+        loaded_sprite.feet = pygame.image.fromstring(loaded_sprite.feet, loaded_sprite.size, "RGBA")            # No component set for feet therefore size has not been scaled up
+
+        loaded_sprite.sprite_base = pygame.image.fromstring(loaded_sprite.sprite_base, loaded_sprite.size, "RGBA")
+
+        return loaded_sprite

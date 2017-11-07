@@ -10,6 +10,9 @@ from Enemy import ChaserEnemy
 from Map import MapClass, MAP
 from Camera import Camera
 
+from SpriteGeneration import character_creation
+from SpriteGeneration import Sprite
+
 class Game:
     delta_time = 0  # time passed since last frame
     tick_time = 0   # time at the start of the frame, in seconds since
@@ -21,8 +24,10 @@ class Game:
     player = None   # pointer to the player object
     map = None      # MapClass object
     quitting = False
-    SCREEN_WIDTH = 640
-    SCREEN_HEIGHT = 480
+    SCREEN_WIDTH = 800 #640
+    SCREEN_HEIGHT = 600 #480
+
+    new_game = True    # If the player needs to create a character or not. For testing only currently.
 
     def __init__(self):
         self.run()
@@ -35,11 +40,16 @@ class Game:
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
                                                self.SCREEN_HEIGHT))
 
+        if self.new_game:
+            # Character creation goes here
+            character_creation.load_creation_window(self.screen)
+
         # Init map
         self.map = MapClass()
 
         # Init character
         self.player = Player(0, 0)
+        self.player.sprite = Sprite.deserialize("player_sprite").image
 
         # Init objects and player
         self.objects = list()
