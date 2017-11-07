@@ -9,9 +9,11 @@ from Attack import Swipe
 from Enemy import ChaserEnemy
 from Map import MapClass, MAP
 from Camera import Camera
+from Menu import *
 
 from SpriteGeneration import character_creation
 from SpriteGeneration import Sprite
+
 
 class Game:
     delta_time = 0  # time passed since last frame
@@ -24,8 +26,9 @@ class Game:
     player = None   # pointer to the player object
     map = None      # MapClass object
     quitting = False
-    SCREEN_WIDTH = 800 #640
-    SCREEN_HEIGHT = 600 #480
+    menu = None
+    SCREEN_WIDTH = 800  # 640
+    SCREEN_HEIGHT = 600  # 480
 
     new_game = True    # If the player needs to create a character or not. For testing only currently.
 
@@ -39,6 +42,11 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH,
                                                self.SCREEN_HEIGHT))
+
+        pygame.display.set_caption('Frontier')
+
+        menu = GameMenu(self.screen)
+        menu.run()
 
         if self.new_game:
             # Character creation goes here
@@ -109,4 +117,4 @@ class Game:
             pygame.display.flip()
 
 # Startup game!
-# Game()
+Game()

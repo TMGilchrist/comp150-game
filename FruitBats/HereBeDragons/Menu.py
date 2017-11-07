@@ -1,12 +1,8 @@
 import sys
 import pygame
-from Game import Game
-
-pygame.init()
 
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
-BLACK = (0, 0, 0)
 
 
 class MenuItem(pygame.font.Font):
@@ -42,23 +38,30 @@ class MenuItem(pygame.font.Font):
 
 class GameMenu:
 
+    running = True
     background_image = None
 
-    def __init__(self, screen, items, funcs, font=None,
+    def __init__(self, screen, font=None,
                  font_size=30, font_color=WHITE):
         self.screen = screen
         self.scr_width = self.screen.get_rect().width
         self.scr_height = self.screen.get_rect().height
 
-        self.clock = pygame.time.Clock()
+        self.background_image = pygame.image.load("ImageFiles/Background.png")
+        self.background_image = self.background_image.convert(32)
+        self.background_image = pygame.transform.scale(self.background_image,
+                                                       (self.scr_width, self.scr_height))
 
-        self.funcs = funcs
+        self.clock = pygame.time.Clock()
+        self.funcs = {"New Game": GameMenu.start_pressed,
+                      "Quit": GameMenu.quit_pressed}
         self.items = []
-        for index, item in enumerate(items):
+        key_list = self.funcs.keys()
+        for index, item in enumerate(key_list):
             menu_item = MenuItem(item, font, font_size, font_color)
 
             # total height of text block
-            total_height = len(items) * menu_item.height
+            total_height = len(key_list) * menu_item.height
             pos_x = (self.scr_width / 2) - (menu_item.width / 2)
             pos_y = (self.scr_height / 2) - (total_height / 2) + ((index * 2) + index * menu_item.height)
 
@@ -67,6 +70,12 @@ class GameMenu:
 
         self.mouse_is_visible = True
         self.cur_item = None
+
+    def start_pressed(self):
+        self.running = False
+
+    def quit_pressed(self):
+        sys.exit()
 
     def set_mouse_visibility(self):
         if self.mouse_is_visible:
@@ -107,7 +116,7 @@ class GameMenu:
         if key == pygame.K_ESCAPE or \
                 key == pygame.K_RETURN:
             text = self.items[self.cur_item].text
-            self.funcs[text]()
+            self.funcs[text](self)
 
     def set_mouse_selection(self, item, mpos):
         """
@@ -120,12 +129,9 @@ class GameMenu:
             item.set_font_color(WHITE)
             item.set_italic(False)
 
-    background_image = pygame.image.load("ImageFiles/Background.png")
-    background_image = background_image.convert(32)
-
     def run(self):
-        mainloop = True
-        while mainloop:
+        self.running = True
+        while self.running:
             # Limit frame speed to 50 FPS
             self.clock.tick(50)
 
@@ -133,14 +139,14 @@ class GameMenu:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    mainloop = False
+                    sys.exit()
                 if event.type == pygame.KEYDOWN:
                     self.mouse_is_visible = False
                     self.set_item_selection(event.key)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for item in self.items:
                         if item.is_mouse_selection(mpos):
-                            self.funcs[item.text]()
+                            self.funcs[item.text](self)
 
             if pygame.mouse.get_rel() != (0, 0):
                 self.mouse_is_visible = True
@@ -157,15 +163,3 @@ class GameMenu:
                 self.screen.blit(item.label, item.position)
 
             pygame.display.flip()
-
-if __name__ == "__main__":
-
-    # Creating the screen
-    screen = pygame.display.set_mode((640, 480), 0, 32)
-
-    funcs = {'New Game': Game,
-             'Quit': sys.exit}
-
-    pygame.display.set_caption('Game Menu')
-    gm = GameMenu(screen, funcs.keys(), funcs)
-    gm.run()
