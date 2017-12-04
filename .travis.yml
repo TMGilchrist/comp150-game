@@ -6,4 +6,4 @@ python:
 
 script: 
 
-  - Map.py
+  - travis_test.py
