@@ -6,4 +6,4 @@ python:
 
 script: 
 
-  - travis_test.py
+  - hello.py
